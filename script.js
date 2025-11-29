@@ -31,7 +31,6 @@ function setupSidebar() {
   closeSidebar.addEventListener('click', closeSidebarFunc);
   sidebarOverlay.addEventListener('click', closeSidebarFunc);
 
-  // Fermer avec la touche Échap
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       closeSidebarFunc();
@@ -39,12 +38,43 @@ function setupSidebar() {
   });
 }
 
-// MISE À JOUR DU STATUT AVEC COULEURS
+// MISE À JOUR DU STATUT
 function updateStatus(message, type = 'loading') {
   const statusElement = document.getElementById('status');
   statusElement.textContent = message;
-  statusElement.className = ''; // Reset classes
+  statusElement.className = '';
   statusElement.classList.add(`status-${type}`);
+}
+
+// CHARGEMENT DES PDF SANS MESSAGES D'ERREUR
+async function loadPDFList() {
+  try {
+    updateStatus('Chargement des PDF...', 'loading');
+    const resp = await fetch(`https://api.github.com/repos/ivanipote/PDF-search/contents/${RECH_FOLDER}`);
+    
+    if (!resp.ok) {
+      allPDFs = [];
+      updateStatus('0 fichier chargé', 'loading');
+      showAllPDFs();
+      return;
+    }
+    
+    const files = await resp.json();
+    allPDFs = files.filter(f => f.name.toLowerCase().endsWith('.pdf'));
+    
+    if (allPDFs.length > 0) {
+      updateStatus(`${allPDFs.length} fichier${allPDFs.length > 1 ? 's' : ''} chargé${allPDFs.length > 1 ? 's' : ''} - Prêt pour la recherche`, 'success');
+    } else {
+      updateStatus('0 fichier chargé', 'loading');
+    }
+    
+    showAllPDFs();
+    
+  } catch (e) {
+    allPDFs = [];
+    updateStatus('0 fichier chargé', 'loading');
+    showAllPDFs();
+  }
 }
 
 // CACHE DES PDF ANALYSÉS
@@ -56,7 +86,6 @@ async function getPDFText(pdfName) {
   let fullText = "";
   try {
     if (typeof pdfjsLib === 'undefined') {
-      console.error("PDF.js non chargé");
       return "";
     }
     
@@ -76,22 +105,46 @@ async function getPDFText(pdfName) {
   return fullText;
 }
 
-// RECHERCHE AVEC DÉLAI (DEBOUNCE)
+// RECHERCHE AVEC DÉLAI (DEBOUNCE) - CORRIGÉ
 function setupSearchDebounce() {
   document.getElementById("searchInput").addEventListener("input", (e) => {
     clearTimeout(searchTimeout);
+    
+    const query = e.target.value.trim();
+    
+    // Si pas de PDF, on affiche directement "Aucun résultat"
+    if (allPDFs.length === 0) {
+      showNoResults();
+      return;
+    }
+    
+    // Si recherche trop courte, on affiche tous les PDF
+    if (query.length < 2) {
+      showAllPDFs();
+      return;
+    }
+    
+    // Sinon, on lance la recherche avec délai
     showLoading();
     
     searchTimeout = setTimeout(() => {
-      const query = e.target.value.trim();
-      if (query.length < 2) {
-        showAllPDFs();
-      } else {
-        currentPage = 1;
-        search(query);
-      }
+      currentPage = 1;
+      search(query);
     }, 300);
   });
+}
+
+// AFFICHER "AUCUN RÉSULTAT" QUAND PAS DE PDF
+function showNoResults() {
+  const grid = document.getElementById("results");
+  grid.innerHTML = `
+    <div style="grid-column: 1/-1; text-align: center; padding: 40px 20px; color: #666;">
+      <h2 style="color: #0066FF;">Aucun PDF disponible</h2>
+      <p>Ajoutez des PDF dans le dossier searchfiles pour commencer la recherche</p>
+    </div>
+  `;
+  document.getElementById("resultCount").textContent = "0 résultat";
+  document.getElementById("pagination").style.display = 'none';
 }
 
 // INDICATEUR DE CHARGEMENT
@@ -157,51 +210,6 @@ function expandQuery(query) {
   return [...new Set(expanded)];
 }
 
-// CHARGEMENT DE LA LISTE DES PDF - CORRIGÉ
-async function loadPDFList() {
-  try {
-    updateStatus('Chargement des PDF...', 'loading');
-    const resp = await fetch(`https://api.github.com/repos/ivanipote/PDF-search/contents/${RECH_FOLDER}`);
-    
-    if (!resp.ok) {
-      throw new Error(`Dossier introuvable: ${resp.status}`);
-    }
-    
-    const files = await resp.json();
-    allPDFs = files.filter(f => f.name.toLowerCase().endsWith('.pdf'));
-    
-    if (allPDFs.length === 0) {
-      updateStatus('✅ Dossier trouvé - Aucun PDF détecté', 'success');
-      showAllPDFs();
-      return;
-    }
-    
-    updateStatus(`✅ ${allPDFs.length} fichiers chargés - Prêt pour la recherche`, 'success');
-    showAllPDFs();
-    
-  } catch (e) {
-    console.error("Erreur chargement:", e);
-    updateStatus('❌ Dossier searchfiles introuvable', 'error');
-    showEmptyState();
-  }
-}
-
-// ÉTAT VIDE QUAND PAS DE PDF
-function showEmptyState() {
-  const grid = document.getElementById("results");
-  grid.innerHTML = `
-    <div class="error-message">
-      <h2>Aucun PDF disponible</h2>
-      <p>Le dossier 'searchfiles' n'existe pas encore sur GitHub ou ne contient pas de PDF</p>
-      <p style="font-size: 0.9rem; color: #888; margin-top: 10px;">
-        Créez le dossier et ajoutez vos PDF pour commencer la recherche
-      </p>
-    </div>
-  `;
-  document.getElementById("resultCount").textContent = "0 PDF disponible";
-  document.getElementById("pagination").style.display = 'none';
-}
-
 // SURlIGNAGE DU TEXTE
 function highlightText(text, terms) {
   let highlighted = text;
@@ -229,9 +237,9 @@ function calculateScore(pdfName, pdfText, terms) {
 
 // FONCTION DE RECHERCHE PRINCIPALE - CORRIGÉE
 async function search(query) {
-  // Si pas de PDF chargés, on ne fait pas de recherche
+  // Si pas de PDF chargés, on affiche aucun résultat
   if (allPDFs.length === 0) {
-    document.getElementById("resultCount").textContent = "0 résultat";
+    showNoResults();
     return;
   }
   
@@ -310,7 +318,7 @@ function displayResults(results) {
 // AFFICHAGE DE TOUS LES PDF - CORRIGÉ
 function showAllPDFs() {
   if (allPDFs.length === 0) {
-    showEmptyState();
+    showNoResults();
     return;
   }
   
