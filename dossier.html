@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mégane - Recherche</title>
+    <title>Mégane - Dossier</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -27,21 +27,13 @@
         </div>
     </header>
 
-    <!-- Barre de recherche -->
-    <div class="search-bar" id="searchBar">
-        <div class="search-container">
-            <div class="search-icon">🔍</div>
-            <input type="text" class="search-input" placeholder="Rechercher un fichier..." id="searchInput">
-        </div>
-    </div>
-
     <!-- Sidebar Simple -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <h2>Menu</h2>
         </div>
         <ul class="sidebar-menu">
-            <li><a href="index.html" class="active">
+            <li><a href="index.html">
                 <span class="menu-icon">🏠</span>
                 <span class="menu-text">Accueil</span>
             </a></li>
@@ -66,19 +58,23 @@
     <!-- Contenu principal -->
     <div class="main-content">
         <div class="content-area">
-            <div class="results-container" id="resultsContainer">
-                <!-- Les résultats de recherche apparaîtront ici -->
+            <div class="page-header">
+                <h1>📁 Dossier des fichiers</h1>
+                <p>Tous vos fichiers organisés</p>
+            </div>
+            <div class="files-grid" id="filesGrid">
+                <!-- La grille de fichiers apparaîtra ici -->
             </div>
         </div>
     </div>
 
     <!-- Barre de navigation en bas -->
     <nav class="bottom-nav">
-        <a href="index.html" class="nav-item active">
+        <a href="index.html" class="nav-item">
             <div class="nav-icon">🔍</div>
             <span>Recherche</span>
         </a>
-        <a href="dossier.html" class="nav-item">
+        <a href="dossier.html" class="nav-item active">
             <div class="nav-icon">📁</div>
             <span>Dossier</span>
         </a>

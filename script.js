@@ -1,364 +1,402 @@
-// CONFIGURATION PDF.js
-if (typeof pdfjsLib !== 'undefined') {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.7.76/pdf.worker.min.js';
-}
-
-// VARIABLES GLOBALES
-const RECH_FOLDER = "searchfiles";
-let allPDFs = [];
-let pdfCache = new Map();
-let searchTimeout;
-let currentPage = 1;
-const resultsPerPage = 12;
-let currentResults = [];
-let usingTestPDFs = false;
-
-// GESTION DU SIDEBAR
-function setupSidebar() {
-  const hamburgerBtn = document.getElementById('hamburgerBtn');
-  const closeSidebar = document.getElementById('closeSidebar');
-  const sidebarOverlay = document.getElementById('sidebarOverlay');
-  const body = document.body;
-
-  function openSidebar() {
-    body.classList.add('sidebar-open');
-  }
-
-  function closeSidebarFunc() {
-    body.classList.remove('sidebar-open');
-  }
-
-  hamburgerBtn.addEventListener('click', openSidebar);
-  closeSidebar.addEventListener('click', closeSidebarFunc);
-  sidebarOverlay.addEventListener('click', closeSidebarFunc);
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      closeSidebarFunc();
-    }
-  });
-}
-
-// MISE À JOUR DU STATUT
-function updateStatus(message, type = 'loading') {
-  const statusElement = document.getElementById('status');
-  statusElement.textContent = message;
-  statusElement.className = '';
-  statusElement.classList.add(`status-${type}`);
-}
-
-// CHARGEMENT DES PDF RÉELS
-async function loadPDFList() {
-  try {
-    updateStatus('Chargement des PDF...', 'loading');
-    const resp = await fetch(`https://api.github.com/repos/ivanipote/PDF-search/contents/${RECH_FOLDER}`);
-    
-    if (!resp.ok) {
-      // SI LE DOSSIER N'EXISTE PAS, ON CRÉE DES PDF DE TEST
-      allPDFs = [];
-      usingTestPDFs = true;
-      createTestPDFs();
-      showAllPDFs();
-      return;
-    }
-    
-    const files = await resp.json();
-    allPDFs = files.filter(f => f.name.toLowerCase().endsWith('.pdf'));
-    
-    if (allPDFs.length > 0) {
-      usingTestPDFs = false;
-      updateStatus(`${allPDFs.length} fichier${allPDFs.length > 1 ? 's' : ''} chargé${allPDFs.length > 1 ? 's' : ''}`, 'success');
-    } else {
-      // SI LE DOSSIER EST VIDE, ON CRÉE DES PDF DE TEST
-      usingTestPDFs = true;
-      createTestPDFs();
-    }
-    
-    showAllPDFs();
-    
-  } catch (e) {
-    // EN CAS D'ERREUR, ON CRÉE DES PDF DE TEST
-    allPDFs = [];
-    usingTestPDFs = true;
-    createTestPDFs();
-    showAllPDFs();
-  }
-}
-
-// CRÉER DES PDF FICTIFS POUR LES TESTS
-function createTestPDFs() {
-  allPDFs = [
-    { name: "cours-mathematiques-avancees.pdf" },
-    { name: "schema-electronique-circuit.pdf" },
-    { name: "cours-physique-quantique.pdf" },
-    { name: "guide-programmation-python.pdf" },
-    { name: "cours-chimie-organique.pdf" },
-    { name: "sys.pdf" }
-  ];
-  updateStatus(`${allPDFs.length} fichiers de démonstration chargés`, 'success');
-}
-
-// CACHE DES PDF ANALYSÉS
-async function getPDFText(pdfName) {
-  if (pdfCache.has(pdfName)) {
-    return pdfCache.get(pdfName);
-  }
-  
-  let fullText = "";
-  try {
-    if (typeof pdfjsLib === 'undefined') {
-      return "";
-    }
-    
-    // POUR LES PDF FICTIFS, RETOURNE UN TEXTE SIMULÉ
-    if (usingTestPDFs) {
-      const simulatedText = simulatePDFContent(pdfName);
-      pdfCache.set(pdfName, simulatedText);
-      return simulatedText;
-    }
-    
-    // POUR LES VRAIS PDF, CHARGE LE CONTENU RÉEL
-    const loadingTask = pdfjsLib.getDocument(`https://raw.githubusercontent.com/ivanipote/PDF-search/main/${RECH_FOLDER}/${pdfName}`);
-    const doc = await loadingTask.promise;
-    
-    for (let p = 1; p <= Math.min(doc.numPages, 10); p++) {
-      const page = await doc.getPage(p);
-      const textContent = await page.getTextContent();
-      const pageText = textContent.items.map(i => i.str).join(" ");
-      fullText += pageText + " ";
-    }
-    pdfCache.set(pdfName, fullText);
-  } catch (e) {
-    console.error("Erreur analyse PDF:", pdfName, e);
-    // EN CAS D'ERREUR, RETOURNE UN TEXTE SIMULÉ
-    const simulatedText = simulatePDFContent(pdfName);
-    pdfCache.set(pdfName, simulatedText);
-    return simulatedText;
-  }
-  return fullText;
-}
-
-// SIMULER LE CONTENU DES PDF POUR LES TESTS
-function simulatePDFContent(pdfName) {
-  const contentMap = {
-    "cours-mathematiques-avancees.pdf": "Ce cours de mathématiques avancées couvre les concepts fondamentaux de l'algèbre linéaire, du calcul différentiel et intégral, ainsi que des probabilités et statistiques. Les étudiants apprendront les matrices, les vecteurs, les fonctions complexes et les équations différentielles.",
-    "schema-electronique-circuit.pdf": "Document technique présentant des schémas électroniques détaillés pour circuits imprimés. Ce guide inclut des diagrammes de circuits analogiques et numériques, avec des explications sur les composants électroniques et leur fonctionnement.",
-    "cours-physique-quantique.pdf": "Introduction à la physique quantique et mécanique quantique. Ce cours explore les principes fondamentaux comme la dualité onde-particule, le principe d'incertitude de Heisenberg et les équations de Schrödinger.",
-    "guide-programmation-python.pdf": "Guide complet pour apprendre la programmation Python. Ce document couvre les bases du langage, les structures de données, les fonctions, les classes et modules, ainsi que des projets pratiques.",
-    "cours-chimie-organique.pdf": "Cours approfondi sur la chimie organique, incluant l'étude des hydrocarbures, des groupes fonctionnels, des réactions organiques et des mécanismes réactionnels.",
-    "sys.pdf": "Document sur les systèmes informatiques et l'administration système. Ce guide couvre la gestion des systèmes d'exploitation, les réseaux informatiques et la sécurité des systèmes."
-  };
-  
-  return contentMap[pdfName] || `Ce document ${pdfName} contient des informations importantes sur son sujet. Le contenu couvre les aspects fondamentaux et avancés du domaine concerné.`;
-}
-
-// RECHERCHE AVEC DÉLAI (DEBOUNCE)
-function setupSearchDebounce() {
-  document.getElementById("searchInput").addEventListener("input", (e) => {
-    clearTimeout(searchTimeout);
-    
-    const query = e.target.value.trim();
-    
-    // Si recherche trop courte, on affiche tous les PDF
-    if (query.length < 2) {
-      showAllPDFs();
-      return;
-    }
-    
-    // Sinon, on lance la recherche avec délai
-    showLoading();
-    
-    searchTimeout = setTimeout(() => {
-      currentPage = 1;
-      search(query);
-    }, 300);
-  });
-}
-
-// INDICATEUR DE CHARGEMENT
-function showLoading() {
-  document.getElementById("results").innerHTML = `
-    <div class="loading">
-      <div class="spinner"></div>
-      <p>Recherche en cours...</p>
-    </div>
-  `;
-  document.getElementById("pagination").style.display = 'none';
-  // CACHER LE COMPTEUR PENDANT LA RECHERCHE
-  document.getElementById("resultCount").style.display = 'none';
-}
-
-// PAGINATION
-function displayPaginatedResults(results) {
-  const start = (currentPage - 1) * resultsPerPage;
-  const end = start + resultsPerPage;
-  const paginatedResults = results.slice(start, end);
-  
-  displayResults(paginatedResults);
-  setupPagination(results.length);
-}
-
-function setupPagination(totalResults) {
-  const totalPages = Math.ceil(totalResults / resultsPerPage);
-  const paginationDiv = document.getElementById("pagination");
-  
-  if (totalPages <= 1) {
-    paginationDiv.style.display = 'none';
-    return;
-  }
-  
-  paginationDiv.style.display = 'flex';
-  paginationDiv.innerHTML = '';
-  
-  for (let i = 1; i <= totalPages; i++) {
-    const btn = document.createElement('button');
-    btn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
-    btn.textContent = i;
-    btn.onclick = () => {
-      currentPage = i;
-      displayPaginatedResults(currentResults);
-    };
-    paginationDiv.appendChild(btn);
-  }
-}
-
-// RECHERCHE SÉMANTIQUE
-const synonymes = {
-  "maths": ["mathématiques", "calcul", "algèbre"],
-  "electronique": ["circuit", "composant", "schéma"],
-  "physique": ["mécanique", "optique", "thermodynamique"],
-  "python": ["programmation", "codage", "développement"],
-  "sys": ["système", "informatique", "administration"]
+// =============================================
+// CONFIGURATION GLOBALE
+// =============================================
+const CONFIG = {
+    GITHUB_REPO: 'ivanipote/premium_search',
+    FILES_FOLDER: 'files',
+    RAW_BASE_URL: 'https://raw.githubusercontent.com/ivanipote/premium_search/main/files/'
 };
 
-function expandQuery(query) {
-  const terms = query.toLowerCase().split(/\s+/);
-  const expanded = [...terms];
-  terms.forEach(term => {
-    if (synonymes[term]) {
-      expanded.push(...synonymes[term]);
+// =============================================
+// NAVIGATION GLOBALE
+// =============================================
+const sidebarToggle = document.getElementById('sidebarToggle');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
+const header = document.querySelector('.header');
+const searchBar = document.getElementById('searchBar');
+const pageTitle = document.querySelector('.page-title');
+const sidebarLinks = document.querySelectorAll('.sidebar-menu a');
+const navItems = document.querySelectorAll('.nav-item');
+
+// Initialisation de la navigation
+function initNavigation() {
+    // Ouvrir/fermer le sidebar
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+            toggleHeaderElements();
+        });
     }
-  });
-  return [...new Set(expanded)];
+
+    // Fermer le sidebar en cliquant sur l'overlay
+    if (overlay) {
+        overlay.addEventListener('click', function() {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+            showHeaderElements();
+        });
+    }
+
+    // Navigation du sidebar
+    sidebarLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetPage = this.getAttribute('href');
+            if (targetPage && !targetPage.startsWith('#')) {
+                window.location.href = targetPage;
+            }
+        });
+    });
+
+    // Navigation du bas
+    navItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetPage = this.getAttribute('href');
+            if (targetPage && !targetPage.startsWith('#')) {
+                window.location.href = targetPage;
+            }
+        });
+    });
 }
 
-// SURlIGNAGE DU TEXTE
-function highlightText(text, terms) {
-  let highlighted = text;
-  terms.forEach(term => {
-    const regex = new RegExp(`(${term})`, 'gi');
-    highlighted = highlighted.replace(regex, '<span class="highlight">$1</span>');
-  });
-  return highlighted;
-}
-
-// CALCUL DU SCORE DE PERTINENCE
-function calculateScore(pdfName, pdfText, terms) {
-  let score = 0;
-  const lowerName = pdfName.toLowerCase();
-  const lowerText = pdfText.toLowerCase();
-  
-  terms.forEach(term => {
-    if (lowerName.includes(term)) score += 3;
-    const matches = (lowerText.match(new RegExp(term, 'gi')) || []).length;
-    score += matches;
-  });
-  
-  return score;
-}
-
-// FONCTION DE RECHERCHE PRINCIPALE
-async function search(query) {
-  const baseTerms = query.toLowerCase().split(/\s+/).filter(t => t.length > 1);
-  const expandedTerms = expandQuery(query);
-  
-  let results = [];
-
-  for (const pdf of allPDFs) {
-    let snippet = "";
-    let fullText = "";
-
-    const nameMatchCount = baseTerms.filter(t => pdf.name.toLowerCase().includes(t)).length;
-
-    try {
-      fullText = await getPDFText(pdf.name);
-      if (!snippet && fullText) {
-        for (const term of baseTerms) {
-          const index = fullText.toLowerCase().indexOf(term);
-          if (index !== -1) {
-            snippet = fullText.substring(Math.max(0, index - 50), index + 150) + "...";
-            break;
-          }
+function toggleHeaderElements() {
+    const elementsToHide = [header, searchBar, pageTitle];
+    elementsToHide.forEach(element => {
+        if (element) {
+            if (sidebar.classList.contains('active')) {
+                element.style.opacity = '0';
+                element.style.visibility = 'hidden';
+            } else {
+                element.style.opacity = '1';
+                element.style.visibility = 'visible';
+            }
         }
-      }
-    } catch (e) {}
+    });
+}
 
-    const score = calculateScore(pdf.name, fullText, expandedTerms);
-    if (score > 0 || nameMatchCount > 0) {
-      results.push({
-        pdf,
-        score,
-        snippet: snippet || "Correspondance dans le nom du fichier",
-        terms: baseTerms
-      });
+function showHeaderElements() {
+    const elementsToShow = [header, searchBar, pageTitle];
+    elementsToShow.forEach(element => {
+        if (element) {
+            element.style.opacity = '1';
+            element.style.visibility = 'visible';
+        }
+    });
+}
+
+// =============================================
+// GESTIONNAIRE DE FICHIERS
+// =============================================
+class FileManager {
+    constructor() {
+        this.files = [];
+        this.init();
     }
-  }
 
-  results.sort((a, b) => b.score - a.score);
-  currentResults = results;
-  displayPaginatedResults(results);
-  
-  // SUPPRIMER LE COMPTEUR DE RÉSULTATS
-  document.getElementById("resultCount").style.display = 'none';
+    async init() {
+        await this.scanGitHubFiles();
+        this.detectPageAndInit();
+    }
+
+    // Scan automatique du dossier GitHub
+    async scanGitHubFiles() {
+        try {
+            const apiUrl = `https://api.github.com/repos/${CONFIG.GITHUB_REPO}/contents/${CONFIG.FILES_FOLDER}`;
+            const response = await fetch(apiUrl);
+            
+            if (!response.ok) throw new Error('Erreur GitHub API');
+            
+            const data = await response.json();
+            this.files = data
+                .filter(item => item.type === 'file')
+                .map(file => ({
+                    name: file.name,
+                    type: this.getFileType(file.name),
+                    size: file.size,
+                    downloadUrl: file.download_url,
+                    rawUrl: `${CONFIG.RAW_BASE_URL}${file.name}`,
+                    lastModified: new Date(file.name).toLocaleDateString('fr-FR')
+                }));
+            
+            console.log(`${this.files.length} fichiers chargés`);
+        } catch (error) {
+            console.error('Erreur scan GitHub:', error);
+            // Fallback: fichiers de test
+            this.files = this.getTestFiles();
+        }
+    }
+
+    getFileType(filename) {
+        const ext = filename.split('.').pop().toLowerCase();
+        const types = {
+            'pdf': 'PDF',
+            'jpg': 'Image', 'jpeg': 'Image', 'png': 'Image', 'gif': 'Image', 'webp': 'Image',
+            'mp3': 'Audio', 'wav': 'Audio', 'ogg': 'Audio',
+            'mp4': 'Vidéo', 'avi': 'Vidéo', 'mov': 'Vidéo',
+            'apk': 'Application',
+            'txt': 'Texte', 'doc': 'Document', 'docx': 'Document'
+        };
+        return types[ext] || 'Fichier';
+    }
+
+    getFileIcon(type) {
+        const icons = {
+            'PDF': '📄',
+            'Image': '🖼️',
+            'Audio': '🎵',
+            'Vidéo': '🎬',
+            'Application': '📱',
+            'Document': '📝',
+            'Fichier': '📎'
+        };
+        return icons[type] || '📎';
+    }
+
+    searchFiles(query) {
+        if (!query) return [];
+        return this.files.filter(file => 
+            file.name.toLowerCase().includes(query.toLowerCase())
+        );
+    }
+
+    getTestFiles() {
+        return [
+            {
+                name: "document.pdf",
+                type: "PDF",
+                size: 1024000,
+                rawUrl: "#",
+                lastModified: "30/11/2024"
+            },
+            {
+                name: "image.jpg",
+                type: "Image", 
+                size: 512000,
+                rawUrl: "#",
+                lastModified: "29/11/2024"
+            },
+            {
+                name: "musique.mp3",
+                type: "Audio",
+                size: 2048000,
+                rawUrl: "#", 
+                lastModified: "28/11/2024"
+            }
+        ];
+    }
 }
 
-// AFFICHAGE DES RÉSULTATS
-function displayResults(results) {
-  const grid = document.getElementById("results");
-  grid.innerHTML = "";
+// =============================================
+// SYSTÈME DE RECHERCHE (index.html)
+// =============================================
+class SearchSystem {
+    constructor(fileManager) {
+        this.fileManager = fileManager;
+        this.searchInput = document.getElementById('searchInput');
+        this.resultsContainer = document.getElementById('resultsContainer');
+        this.init();
+    }
 
-  if (results.length === 0) {
-    grid.innerHTML = `
-      <div style="grid-column: 1/-1; text-align: center; padding: 40px 20px; color: #666;">
-        <h2 style="color: #0066FF;">Aucun résultat trouvé</h2>
-        <p>Essayez avec d'autres mots-clés</p>
-      </div>
+    init() {
+        if (this.searchInput && this.resultsContainer) {
+            this.searchInput.addEventListener('input', (e) => {
+                this.performSearch(e.target.value);
+            });
+        }
+    }
+
+    performSearch(query) {
+        const results = this.fileManager.searchFiles(query);
+        this.displayResults(results, query);
+    }
+
+    displayResults(files, query) {
+        if (!query) {
+            this.resultsContainer.innerHTML = '<p class="no-results">Tapez quelque chose pour rechercher...</p>';
+            return;
+        }
+
+        if (files.length === 0) {
+            this.resultsContainer.innerHTML = `<p class="no-results">Aucun résultat pour "${query}"</p>`;
+            return;
+        }
+
+        this.resultsContainer.innerHTML = files.map(file => `
+            <div class="file-card">
+                <div class="file-header">
+                    <div class="file-icon">${this.fileManager.getFileIcon(file.type)}</div>
+                    <div class="file-info">
+                        <div class="file-name">${file.name}</div>
+                        <div class="file-type">${file.type} • ${this.formatSize(file.size)}</div>
+                        <div class="file-date">Ajouté le ${file.lastModified}</div>
+                    </div>
+                </div>
+                <div class="file-actions">
+                    <button class="btn btn-primary" onclick="fileManager.previewFile('${file.rawUrl}', '${file.type}')">
+                        Ouvrir
+                    </button>
+                    <button class="btn btn-secondary" onclick="fileManager.downloadFile('${file.rawUrl}', '${file.name}')">
+                        Télécharger
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    formatSize(bytes) {
+        if (!bytes) return 'Taille inconnue';
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(1024));
+        return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+    }
+}
+
+// =============================================
+// SYSTÈME DOSSIER (dossier.html)
+// =============================================
+class DossierSystem {
+    constructor(fileManager) {
+        this.fileManager = fileManager;
+        this.filesGrid = document.getElementById('filesGrid');
+        this.init();
+    }
+
+    init() {
+        if (this.filesGrid) {
+            this.displayAllFiles();
+        }
+    }
+
+    displayAllFiles() {
+        if (this.fileManager.files.length === 0) {
+            this.filesGrid.innerHTML = '<p class="no-results">Aucun fichier trouvé</p>';
+            return;
+        }
+
+        this.filesGrid.innerHTML = this.fileManager.files.map(file => `
+            <div class="file-card">
+                <div class="file-header">
+                    <div class="file-icon">${this.fileManager.getFileIcon(file.type)}</div>
+                    <div class="file-info">
+                        <div class="file-name">${file.name}</div>
+                        <div class="file-type">${file.type} • ${this.formatSize(file.size)}</div>
+                        <div class="file-date">Ajouté le ${file.lastModified}</div>
+                    </div>
+                </div>
+                <div class="file-actions">
+                    <button class="btn btn-primary" onclick="fileManager.previewFile('${file.rawUrl}', '${file.type}')">
+                        Ouvrir
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    formatSize(bytes) {
+        if (!bytes) return 'Taille inconnue';
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(1024));
+        return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+    }
+}
+
+// =============================================
+// PRÉVISUALISATION DES FICHIERS
+// =============================================
+FileManager.prototype.previewFile = function(url, type) {
+    switch(type) {
+        case 'PDF':
+            this.previewPDF(url);
+            break;
+        case 'Image':
+            this.previewImage(url);
+            break;
+        case 'Audio':
+            this.previewAudio(url);
+            break;
+        default:
+            this.downloadFile(url, 'fichier');
+    }
+};
+
+FileManager.prototype.previewPDF = function(url) {
+    // Ouvrir dans un nouvel onglet pour l'instant
+    window.open(url, '_blank');
+};
+
+FileManager.prototype.previewImage = function(url) {
+    const modal = this.createModal();
+    modal.innerHTML = `
+        <div class="preview-content">
+            <img src="${url}" alt="Preview" style="max-width: 90vw; max-height: 80vh; border-radius: 10px;">
+            <button class="btn btn-primary" onclick="this.closest('.preview-modal').remove()">Fermer</button>
+            <button class="btn btn-secondary" onclick="fileManager.downloadFile('${url}', 'image')">Télécharger</button>
+        </div>
     `;
-    return;
-  }
+    document.body.appendChild(modal);
+};
 
-  results.forEach(item => {
-    // POUR LES VRAIS PDF, LIEN DE TÉLÉCHARGEMENT RÉEL
-    const rawUrl = usingTestPDFs 
-      ? "#" 
-      : `https://raw.githubusercontent.com/ivanipote/PDF-search/main/${RECH_FOLDER}/${item.pdf.name}`;
+FileManager.prototype.previewAudio = function(url) {
+    const modal = this.createModal();
+    modal.innerHTML = `
+        <div class="preview-content">
+            <audio controls style="width: 300px; margin: 20px 0;">
+                <source src="${url}" type="audio/mpeg">
+                Votre navigateur ne supporte pas l'audio.
+            </audio>
+            <br>
+            <button class="btn btn-primary" onclick="this.closest('.preview-modal').remove()">Fermer</button>
+            <button class="btn btn-secondary" onclick="fileManager.downloadFile('${url}', 'audio')">Télécharger</button>
+        </div>
+    `;
+    document.body.appendChild(modal);
+};
+
+FileManager.prototype.createModal = function() {
+    const modal = document.createElement('div');
+    modal.className = 'preview-modal';
+    modal.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.8); backdrop-filter: blur(10px);
+        display: flex; align-items: center; justify-content: center;
+        z-index: 10000;
+    `;
+    return modal;
+};
+
+FileManager.prototype.downloadFile = function(url, filename) {
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+};
+
+// =============================================
+// DÉTECTION DE PAGE ET INITIALISATION
+// =============================================
+FileManager.prototype.detectPageAndInit = function() {
+    const currentPage = window.location.pathname.split('/').pop();
     
-    const card = document.createElement("div");
-    card.className = "result-card";
-    card.innerHTML = `
-      <div class="score-badge">Score ${item.score}</div>
-      <div class="file-title">📄 ${item.pdf.name}</div>
-      <div class="snippet">${highlightText(item.snippet, item.terms)}</div>
-      ${usingTestPDFs 
-        ? '<button class="download-btn" style="background: #666; cursor: not-allowed;">PDF de démonstration</button>' 
-        : `<a href="${rawUrl}" download class="download-btn">Télécharger le PDF</a>`
-      }
-    `;
-    grid.appendChild(card);
-  });
-}
+    if (currentPage === 'index.html' || currentPage === '') {
+        this.searchSystem = new SearchSystem(this);
+    } else if (currentPage === 'dossier.html') {
+        this.dossierSystem = new DossierSystem(this);
+    }
+};
 
-// AFFICHAGE DE TOUS LES PDF
-function showAllPDFs() {
-  currentResults = allPDFs;
-  displayPaginatedResults(allPDFs);
-  // CACHER LE COMPTEUR
-  document.getElementById("resultCount").style.display = 'none';
-}
+// =============================================
+// INITIALISATION AU CHARGEMENT
+// =============================================
+document.addEventListener('DOMContentLoaded', function() {
+    // Animation d'entrée
+    setTimeout(() => {
+        document.body.style.opacity = '1';
+    }, 100);
 
-// INITIALISATION
-document.addEventListener('DOMContentLoaded', () => {
-  setupSidebar();
-  setupSearchDebounce();
-  loadPDFList();
+    // Initialisation des systèmes
+    initNavigation();
+    window.fileManager = new FileManager();
 });
