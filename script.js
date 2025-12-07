@@ -1,814 +1,397 @@
-// =============================================
-// CONFIGURATION GLOBALE
-// =============================================
+// Configuration
 const CONFIG = {
-    GITHUB_REPO: 'ivanipote/premium_search',
-    FILES_FOLDER: 'files',
-    RAW_BASE_URL: 'https://raw.githubusercontent.com/ivanipote/premium_search/main/files/'
+    mathFile: 'math/math.txt',
+    pcFile: 'pc/pc.txt'
 };
 
-// =============================================
-// NAVIGATION GLOBALE SIMPLIFIÉE
-// =============================================
-const sidebarToggle = document.getElementById('sidebarToggle');
+// Éléments DOM
+const hamburgerBtn = document.getElementById('hamburgerBtn');
+const closeSidebar = document.getElementById('closeSidebar');
 const sidebar = document.getElementById('sidebar');
 const overlay = document.getElementById('overlay');
-const sidebarClose = document.getElementById('sidebarClose');
+const mainSearch = document.getElementById('mainSearch');
+const searchBtn = document.getElementById('searchBtn');
+const resultsContainer = document.getElementById('resultsContainer');
+const resultsCount = document.getElementById('resultsCount');
+const formulaTemplate = document.getElementById('formulaTemplate');
+const navItems = document.querySelectorAll('.nav-item');
+const filterBtns = document.querySelectorAll('.filter-btn');
 
-// Initialisation de la navigation
-function initNavigation() {
-    // Ouvrir le sidebar
-    if (sidebarToggle) {
-        sidebarToggle.addEventListener('click', function() {
-            sidebar.classList.add('active');
-            overlay.classList.add('active');
-        });
+// État
+let allFormulas = [];
+let currentFilter = 'all';
+
+// Initialisation
+document.addEventListener('DOMContentLoaded', async () => {
+    // Afficher la page d'accueil immédiatement
+    showWelcomePage();
+    
+    try {
+        const [mathData, pcData] = await Promise.all([
+            loadFile(CONFIG.mathFile, 'mathématique'),
+            loadFile(CONFIG.pcFile, 'physique-chimie')
+        ]);
+        
+        allFormulas = [...mathData, ...pcData];
+        console.log(`${allFormulas.length} formules chargées en arrière-plan`);
+    } catch (error) {
+        console.error('Erreur de chargement:', error);
+        // On n'affiche pas d'erreur sur la page d'accueil
     }
+    
+    setupEventListeners();
+});
 
-    // Fermer le sidebar avec le bouton croix
-    if (sidebarClose) {
-        sidebarClose.addEventListener('click', closeSidebar);
+// Charger un fichier
+async function loadFile(filePath, type) {
+    try {
+        const response = await fetch(filePath);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        const text = await response.text();
+        return parseFormulas(text, type);
+    } catch (error) {
+        console.warn(`⚠️ Impossible de charger ${filePath}:`, error.message);
+        return [];
     }
+}
 
-    // Fermer le sidebar en cliquant sur l'overlay
-    if (overlay) {
-        overlay.addEventListener('click', closeSidebar);
-    }
-
-    // Navigation du sidebar
-    const sidebarLinks = document.querySelectorAll('.sidebar-menu a');
-    sidebarLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            const targetPage = this.getAttribute('href');
-            if (targetPage && !targetPage.startsWith('#')) {
-                closeSidebar();
-                setTimeout(() => {
-                    window.location.href = targetPage;
-                }, 300);
+// Parser les formules
+function parseFormulas(text, type) {
+    const formulas = [];
+    const blocks = text.trim().split('---').filter(block => block.trim());
+    
+    blocks.forEach((block, index) => {
+        const formula = {
+            id: `${type}-${index}`,
+            type: type,
+            title: '',
+            formula: '',
+            description: '',
+            category: ''
+        };
+        
+        block.split('\n').forEach(line => {
+            line = line.trim();
+            if (line.startsWith('TITRE:')) {
+                formula.title = line.substring(6).trim();
+            } else if (line.startsWith('FORMULE:')) {
+                formula.formula = line.substring(8).trim();
+            } else if (line.startsWith('DESCRIPTION:')) {
+                formula.description = line.substring(12).trim();
+            } else if (line.startsWith('CATEGORIE:')) {
+                formula.category = line.substring(10).trim();
             }
         });
+        
+        if (formula.title && formula.formula) {
+            formulas.push(formula);
+        }
     });
+    
+    return formulas;
+}
 
-    // Navigation du bas
-    const navItems = document.querySelectorAll('.nav-item');
+// Configurer les événements
+function setupEventListeners() {
+    // Sidebar
+    hamburgerBtn.addEventListener('click', () => {
+        sidebar.classList.add('active');
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    });
+    
+    closeSidebar.addEventListener('click', closeSidebarFunc);
+    overlay.addEventListener('click', closeSidebarFunc);
+    
+    // Recherche avec anti-rebond
+    const debouncedSearch = debounce((value) => performSearch(value), 300);
+    
+    mainSearch.addEventListener('input', (e) => {
+        debouncedSearch(e.target.value);
+    });
+    
+    searchBtn.addEventListener('click', () => {
+        performSearch(mainSearch.value);
+    });
+    
+    mainSearch.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            performSearch(mainSearch.value);
+        }
+    });
+    
+    // Navigation
     navItems.forEach(item => {
-        item.addEventListener('click', function(e) {
+        item.addEventListener('click', (e) => {
             e.preventDefault();
-            const targetPage = this.getAttribute('href');
-            if (targetPage && !targetPage.startsWith('#')) {
-                window.location.href = targetPage;
+            navItems.forEach(nav => nav.classList.remove('active'));
+            item.classList.add('active');
+            const tab = item.dataset.tab;
+            switchTab(tab);
+        });
+    });
+    
+    // Filtres
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            filterBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentFilter = getFilterType(btn.textContent);
+            
+            // Si une recherche est en cours, on relance la recherche avec le filtre
+            if (mainSearch.value.trim()) {
+                performSearch(mainSearch.value);
             }
         });
     });
 }
 
-// Fonction pour fermer le sidebar
-function closeSidebar() {
+// Fermer la sidebar
+function closeSidebarFunc() {
     sidebar.classList.remove('active');
     overlay.classList.remove('active');
-}
-// =============================================
-// GESTIONNAIRE DE FICHIERS AVEC RECHERCHE AVANCÉE
-// =============================================
-class FileManager {
-    constructor() {
-        this.files = [];
-        this.selectedFile = null;
-        this.fileContents = new Map(); // Cache pour le contenu des fichiers
-        this.init();
-    }
-
-    async init() {
-        await this.scanGitHubFiles();
-        this.detectPageAndInit();
-        this.initFileSelection();
-    }
-
-    // Scan automatique du dossier GitHub
-    async scanGitHubFiles() {
-        try {
-            const apiUrl = `https://api.github.com/repos/${CONFIG.GITHUB_REPO}/contents/${CONFIG.FILES_FOLDER}`;
-            const response = await fetch(apiUrl);
-            
-            if (!response.ok) throw new Error('Erreur GitHub API');
-            
-            const data = await response.json();
-            this.files = data
-                .filter(item => item.type === 'file')
-                .map(file => ({
-                    name: file.name,
-                    type: this.getFileType(file.name),
-                    size: file.size,
-                    downloadUrl: file.download_url,
-                    rawUrl: `${CONFIG.RAW_BASE_URL}${file.name}`,
-                    lastModified: new Date().toLocaleDateString('fr-FR'),
-                    searchableContent: '' // Sera rempli plus tard
-                }));
-            
-            console.log(`${this.files.length} fichiers chargés`);
-            
-            // Précharger le contenu des fichiers pour la recherche
-            await this.preloadFileContents();
-        } catch (error) {
-            console.error('Erreur scan GitHub:', error);
-            // Fallback: fichiers de test
-            this.files = this.getTestFiles();
-        }
-    }
-
-    // Précharger le contenu des fichiers pour la recherche avancée
-    async preloadFileContents() {
-        const promises = this.files.map(async (file) => {
-            try {
-                if (file.type === 'PDF') {
-                    // Pour les PDF, on récupère le texte
-                    const text = await this.extractPDFText(file.rawUrl);
-                    file.searchableContent = text;
-                } else if (file.type === 'Texte' || file.type === 'Document') {
-                    // Pour les fichiers texte, on récupère le contenu
-                    const response = await fetch(file.rawUrl);
-                    const text = await response.text();
-                    file.searchableContent = text;
-                } else {
-                    // Pour les autres types, on utilise seulement le nom
-                    file.searchableContent = file.name;
-                }
-            } catch (error) {
-                console.error(`Erreur chargement ${file.name}:`, error);
-                file.searchableContent = file.name; // Fallback sur le nom
-            }
-        });
-        
-        await Promise.allSettled(promises);
-        console.log('Contenu des fichiers préchargé pour la recherche');
-    }
-
-    // Extraction de texte depuis PDF (version simplifiée)
-    async extractPDFText(pdfUrl) {
-        try {
-            // Pour l'instant, on retourne une chaîne vide
-            // Dans une vraie implémentation, on utiliserait pdf.js ou un service similaire
-            return '';
-        } catch (error) {
-            console.error('Erreur extraction PDF:', error);
-            return '';
-        }
-    }
-
-    getFileType(filename) {
-        const ext = filename.split('.').pop().toLowerCase();
-        const types = {
-            'pdf': 'PDF',
-            'jpg': 'Image', 'jpeg': 'Image', 'png': 'Image', 'gif': 'Image', 'webp': 'Image',
-            'mp3': 'Audio', 'wav': 'Audio', 'ogg': 'Audio',
-            'mp4': 'Vidéo', 'avi': 'Vidéo', 'mov': 'Vidéo',
-            'apk': 'Application',
-            'txt': 'Texte', 'doc': 'Document', 'docx': 'Document'
-        };
-        return types[ext] || 'Fichier';
-    }
-
-    getFileIcon(type) {
-        const icons = {
-            'PDF': '📄',
-            'Image': '🖼️',
-            'Audio': '🎵',
-            'Vidéo': '🎬',
-            'Application': '📱',
-            'Document': '📝',
-            'Fichier': '📎'
-        };
-        return icons[type] || '📎';
-    }
-
-    // RECHERCHE AVANCÉE : recherche dans le nom ET le contenu
-    searchFiles(query) {
-        if (!query.trim()) return [];
-        
-        const searchTerms = query.toLowerCase().split(/\s+/).filter(term => term.length > 0);
-        
-        return this.files.filter(file => {
-            // Recherche dans le nom du fichier
-            const fileNameMatch = searchTerms.some(term => 
-                file.name.toLowerCase().includes(term)
-            );
-            
-            if (fileNameMatch) return true;
-            
-            // Recherche dans le contenu (si disponible)
-            if (file.searchableContent && file.searchableContent.length > 0) {
-                const contentMatch = searchTerms.some(term =>
-                    file.searchableContent.toLowerCase().includes(term)
-                );
-                return contentMatch;
-            }
-            
-            return false;
-        });
-    }
-
-    getTestFiles() {
-        return [
-            {
-                name: "document.pdf",
-                type: "PDF",
-                size: 1024000,
-                rawUrl: "#",
-                lastModified: "30/11/2024",
-                searchableContent: "Ceci est un document PDF de test contenant des informations importantes sur la technologie et l'innovation."
-            },
-            {
-                name: "image.jpg",
-                type: "Image", 
-                size: 512000,
-                rawUrl: "#",
-                lastModified: "29/11/2024",
-                searchableContent: "image.jpg"
-            },
-            {
-                name: "musique.mp3",
-                type: "Audio",
-                size: 2048000,
-                rawUrl: "#", 
-                lastModified: "28/11/2024",
-                searchableContent: "musique.mp3"
-            },
-            {
-                name: "rapport.txt",
-                type: "Texte",
-                size: 1024,
-                rawUrl: "#",
-                lastModified: "27/11/2024",
-                searchableContent: "Rapport annuel 2024. Ce document contient des données financières importantes et des analyses de marché détaillées."
-            },
-            {
-                name: "app.apk",
-                type: "Application",
-                size: 5120000,
-                rawUrl: "#",
-                lastModified: "26/11/2024",
-                searchableContent: "app.apk"
-            }
-        ];
-    }
-
-    // Sélection de fichier
-    initFileSelection() {
-        document.addEventListener('click', (e) => {
-            const fileCard = e.target.closest('.file-card');
-            if (fileCard && !e.target.closest('.file-actions')) {
-                this.selectFile(fileCard);
-            }
-        });
-    }
-
-    selectFile(fileCard) {
-        // Désélectionner précédent
-        if (this.selectedFile) {
-            this.selectedFile.classList.remove('selected');
-        }
-        
-        // Sélectionner nouveau
-        fileCard.classList.add('selected');
-        this.selectedFile = fileCard;
-        
-        console.log('Fichier sélectionné:', fileCard.querySelector('.file-name').textContent);
-    }
-
-    // Méthodes professionnelles
-    showToast(message, type = 'info') {
-        const toast = document.createElement('div');
-        toast.className = `toast toast-${type}`;
-        toast.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(45, 48, 71, 0.95);
-            backdrop-filter: blur(20px);
-            color: white;
-            padding: 15px 20px;
-            border-radius: 10px;
-            border: 1px solid rgba(101, 78, 163, 0.5);
-            z-index: 10000;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-        `;
-        toast.textContent = message;
-        document.body.appendChild(toast);
-        
-        setTimeout(() => {
-            toast.remove();
-        }, 3000);
-    }
+    document.body.style.overflow = 'auto';
 }
 
-// =============================================
-// PRÉVISUALISATION AVANCÉE DES FICHIERS
-// =============================================
-FileManager.prototype.previewFile = function(url, type, filename, searchQuery = '') {
-    switch(type) {
-        case 'PDF':
-            this.openPDF(url, filename, searchQuery);
-            break;
-        case 'Audio':
-            this.previewAudio(url, filename);
-            break;
-        case 'Image':
-            this.previewImage(url, filename);
-            break;
-        case 'Texte':
-        case 'Document':
-            this.previewText(url, filename, searchQuery);
-            break;
-        default:
-            this.downloadFile(url, filename);
-    }
-};
+// Anti-rebond
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
 
-// PDF - Ouverture avec recherche de texte
-FileManager.prototype.openPDF = function(url, filename, searchQuery = '') {
-    const modal = this.createModal();
+// Effectuer la recherche
+function performSearch(query = '') {
+    // CONVERSION SÉCURISÉE EN STRING
+    const searchTerm = String(query || '').toLowerCase().trim();
     
-    modal.innerHTML = `
-        <div class="preview-content pdf-preview">
-            <div class="pdf-header">
-                <h3>📖 ${filename}</h3>
-                <div class="pdf-actions-top">
-                    <button class="btn btn-primary" onclick="fileManager.downloadFile('${url}', '${filename}')">
-                        📥 Télécharger
-                    </button>
-                    <button class="btn btn-secondary" onclick="this.closest('.preview-modal').remove()">
-                        Fermer
-                    </button>
+    // Si la recherche est vide, on affiche la page d'accueil
+    if (!searchTerm) {
+        showWelcomePage();
+        return;
+    }
+    
+    let filtered = allFormulas;
+    
+    // Appliquer le filtre
+    if (currentFilter !== 'all') {
+        filtered = filtered.filter(formula => {
+            const cat = (formula.category || '').toLowerCase();
+            if (currentFilter === 'géométrie') return cat.includes('géométrie');
+            if (currentFilter === 'analyse') return cat.includes('analyse');
+            if (currentFilter === 'physique') return formula.type === 'physique-chimie';
+            if (currentFilter === 'chimie') return cat.includes('chimie');
+            return true;
+        });
+    }
+    
+    // Filtrer par recherche
+    filtered = filtered.filter(formula => {
+        const searchText = `${formula.title || ''} ${formula.category || ''} ${formula.description || ''}`.toLowerCase();
+        return searchText.includes(searchTerm);
+    });
+    
+    displayResults(filtered, searchTerm);
+}
+
+// Afficher la page d'accueil (aucun résultat)
+function showWelcomePage() {
+    resultsCount.textContent = '0 résultat';
+    
+    resultsContainer.innerHTML = `
+        <div class="welcome-message">
+            <div class="welcome-icon">
+                <i class="fas fa-square-root-alt"></i>
+            </div>
+            <h3>Bienvenue sur MathLab</h3>
+            <p>Recherchez des formules de mathématiques et physique</p>
+            <div class="welcome-examples">
+                <span class="example-tag">Pythagore</span>
+                <span class="example-tag">Énergie cinétique</span>
+                <span class="example-tag">Dérivée</span>
+                <span class="example-tag">Loi d'Ohm</span>
+                <span class="example-tag">Théorème</span>
+                <span class="example-tag">Intégrale</span>
+            </div>
+            <div class="welcome-tips">
+                <p><i class="fas fa-lightbulb"></i> Utilisez les filtres pour affiner votre recherche</p>
+            </div>
+        </div>
+    `;
+    
+    // Re-lier les événements aux tags d'exemple
+    document.querySelectorAll('.example-tag').forEach(tag => {
+        tag.addEventListener('click', (e) => {
+            const searchText = e.target.textContent;
+            mainSearch.value = searchText;
+            performSearch(searchText);
+        });
+    });
+}
+
+// Afficher les résultats SEULEMENT après recherche
+function displayResults(formulas, searchTerm = '') {
+    resultsCount.textContent = `${formulas.length} résultat${formulas.length !== 1 ? 's' : ''}`;
+    
+    if (formulas.length === 0) {
+        resultsContainer.innerHTML = `
+            <div class="welcome-message">
+                <div class="welcome-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <h3>Aucun résultat</h3>
+                <p>Aucune formule ne correspond à "${searchTerm}"</p>
+                <div class="welcome-examples">
+                    <span class="example-tag">Pythagore</span>
+                    <span class="example-tag">Énergie</span>
+                    <span class="example-tag">Dérivée</span>
+                    <span class="example-tag">Loi d'Ohm</span>
                 </div>
             </div>
-            <div class="pdf-loading">
-                <div class="loading-spinner"></div>
-                <p>Chargement du PDF...</p>
-                ${searchQuery ? `<p class="search-info">Recherche du terme: "${searchQuery}"</p>` : ''}
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-
-    // Utiliser Google Viewer avec highlight si recherche
-    const googleViewerUrl = searchQuery 
-        ? `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(url)}&hl=fr&q=${encodeURIComponent(searchQuery)}`
-        : `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(url)}`;
-
-    setTimeout(() => {
-        const iframe = document.createElement('iframe');
-        iframe.src = googleViewerUrl;
-        iframe.width = '100%';
-        iframe.height = '600px';
-        iframe.frameBorder = '0';
-        iframe.style.borderRadius = '10px';
-        iframe.onload = () => {
-            const loading = modal.querySelector('.pdf-loading');
-            if (loading) loading.style.display = 'none';
-        };
-        iframe.onerror = () => {
-            this.fallbackPDF(url, filename, modal, searchQuery);
-        };
-
-        const pdfContainer = document.createElement('div');
-        pdfContainer.className = 'pdf-container';
-        pdfContainer.appendChild(iframe);
+        `;
         
-        modal.querySelector('.preview-content').appendChild(pdfContainer);
-    }, 500);
-};
-
-// Fallback PDF amélioré
-FileManager.prototype.fallbackPDF = function(url, filename, modal, searchQuery = '') {
-    const content = modal.querySelector('.preview-content');
-    content.innerHTML = `
-        <div class="preview-content">
-            <div class="pdf-header">
-                <h3>📖 ${filename}</h3>
-            </div>
-            <div class="pdf-alternative">
-                <div class="icon">📄</div>
-                <h3>PDF non visualisable directement</h3>
-                <p>Le PDF ne peut pas être affiché dans cette visionneuse.</p>
-                ${searchQuery ? `<p class="search-info">Terme recherché: <strong>"${searchQuery}"</strong></p>` : ''}
-                <p>Vous pouvez le télécharger pour le visualiser localement.</p>
-            </div>
-            <div class="pdf-actions">
-                <button class="btn btn-primary" onclick="fileManager.downloadFile('${url}', '${filename}')">
-                    📥 Télécharger le PDF
-                </button>
-                <button class="btn btn-secondary" onclick="window.open('${url}', '_blank')">
-                    Ouvrir dans un nouvel onglet
-                </button>
-                <button class="btn btn-secondary" onclick="this.closest('.preview-modal').remove()">
-                    Fermer
-                </button>
-            </div>
-        </div>
-    `;
-};
-
-// Prévisualisation de texte avec surlignage
-FileManager.prototype.previewText = function(url, filename, searchQuery = '') {
-    const modal = this.createModal();
+        // Re-lier les événements
+        document.querySelectorAll('.example-tag').forEach(tag => {
+            tag.addEventListener('click', (e) => {
+                const searchText = e.target.textContent;
+                mainSearch.value = searchText;
+                performSearch(searchText);
+            });
+        });
+        
+        return;
+    }
     
-    modal.innerHTML = `
-        <div class="preview-content text-preview">
-            <div class="text-header">
-                <h3>📝 ${filename}</h3>
-                <button class="btn btn-primary" onclick="fileManager.downloadFile('${url}', '${filename}')">
-                    📥 Télécharger
-                </button>
-            </div>
-            <div class="text-loading">
-                <div class="loading-spinner"></div>
-                <p>Chargement du document...</p>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
+    // Afficher les résultats
+    resultsContainer.innerHTML = '';
+    
+    formulas.forEach(formula => {
+        const card = createFormulaCard(formula, searchTerm);
+        resultsContainer.appendChild(card);
+    });
+    
+    // MathJax
+    if (window.MathJax && window.MathJax.typesetPromise) {
+        MathJax.typesetPromise();
+    }
+}
 
-    // Charger et afficher le contenu texte
-    this.loadAndHighlightText(url, searchQuery, modal);
-};
+// Créer une carte de formule (SANS BOUTON DÉTAILS)
+function createFormulaCard(formula, searchTerm) {
+    const clone = formulaTemplate.content.cloneNode(true);
+    
+    // Titre
+    const title = clone.querySelector('.formula-title');
+    title.innerHTML = highlightText(formula.title, searchTerm);
+    
+    // Catégorie
+    const category = clone.querySelector('.formula-category');
+    category.textContent = formula.category || 'Général';
+    
+    // Formule
+    const formulaDisplay = clone.querySelector('.formula-display');
+    const formulaText = formula.formula.includes('$') || formula.formula.includes('\\(') 
+        ? formula.formula 
+        : `\\(${formula.formula}\\)`;
+    formulaDisplay.innerHTML = formulaText;
+    
+    // Description
+    const description = clone.querySelector('.formula-description');
+    description.innerHTML = highlightText(formula.description, searchTerm) || 'Aucune description';
+    
+    // Source
+    const source = clone.querySelector('.source-type');
+    source.textContent = formula.type.charAt(0).toUpperCase() + formula.type.slice(1);
+    
+    // Bouton favori
+    const favoriteBtn = clone.querySelector('.favorite-btn');
+    favoriteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const icon = favoriteBtn.querySelector('i');
+        if (icon.classList.contains('far')) {
+            icon.classList.remove('far');
+            icon.classList.add('fas');
+            icon.style.color = '#ffd700'; // Or pour favori
+        } else {
+            icon.classList.remove('fas');
+            icon.classList.add('far');
+            icon.style.color = ''; // Retour à la couleur par défaut
+        }
+    });
+    
+    return clone;
+}
 
-FileManager.prototype.loadAndHighlightText = async function(url, searchQuery, modal) {
+// Surligner le texte recherché
+function highlightText(text, searchTerm) {
+    if (!searchTerm || !text || typeof text !== 'string') return text || '';
+    
     try {
-        const response = await fetch(url);
-        const text = await response.text();
-        
-        let highlightedText = text;
-        if (searchQuery) {
-            const regex = new RegExp(`(${this.escapeRegex(searchQuery)})`, 'gi');
-            highlightedText = text.replace(regex, '<mark class="search-highlight">$1</mark>');
-        }
-        
-        const content = modal.querySelector('.preview-content');
-        content.innerHTML = `
-            <div class="preview-content">
-                <div class="text-header">
-                    <h3>📝 ${url.split('/').pop()}</h3>
-                    <div class="text-actions">
-                        <button class="btn btn-primary" onclick="fileManager.downloadFile('${url}', '${url.split('/').pop()}')">
-                            📥 Télécharger
-                        </button>
-                        <button class="btn btn-secondary" onclick="this.closest('.preview-modal').remove()">
-                            Fermer
-                        </button>
-                    </div>
-                </div>
-                <div class="text-content">
-                    <pre>${highlightedText}</pre>
-                </div>
-                ${searchQuery ? `
-                <div class="search-stats">
-                    <p>Terme recherché: <strong>"${searchQuery}"</strong></p>
-                </div>
-                ` : ''}
-            </div>
-        `;
-    } catch (error) {
-        const content = modal.querySelector('.preview-content');
-        content.innerHTML = `
-            <div class="preview-content">
-                <h3>❌ Erreur</h3>
-                <p>Impossible de charger le fichier texte.</p>
-                <button class="btn btn-secondary" onclick="this.closest('.preview-modal').remove()">
-                    Fermer
-                </button>
-            </div>
-        `;
+        const regex = new RegExp(`(${escapeRegex(searchTerm)})`, 'gi');
+        return text.replace(regex, '<mark class="highlight">$1</mark>');
+    } catch (e) {
+        return text;
     }
-};
+}
 
-FileManager.prototype.escapeRegex = function(string) {
+// Échapper pour Regex
+function escapeRegex(string) {
     return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-};
-
-// Audio - Prévisualisation avec lecteur
-FileManager.prototype.previewAudio = function(url, filename) {
-    const modal = this.createModal();
-    modal.innerHTML = `
-        <div class="preview-content">
-            <h3 style="margin-bottom: 20px;">🎵 ${filename}</h3>
-            <div class="audio-player">
-                <audio controls style="width: 300px;">
-                    <source src="${url}" type="audio/mpeg">
-                    Votre navigateur ne supporte pas l'audio.
-                </audio>
-            </div>
-            <div style="margin-top: 20px; display: flex; gap: 10px;">
-                <button class="btn btn-primary" onclick="fileManager.downloadFile('${url}', '${filename}')">
-                    📥 Télécharger
-                </button>
-                <button class="btn btn-secondary" onclick="this.closest('.preview-modal').remove()">
-                    Fermer
-                </button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-};
-
-// Image - Prévisualisation normale
-FileManager.prototype.previewImage = function(url, filename) {
-    const modal = this.createModal();
-    modal.innerHTML = `
-        <div class="preview-content">
-            <img src="${url}" alt="Preview" style="max-width: 90vw; max-height: 70vh; border-radius: 10px;">
-            <div style="margin-top: 20px; display: flex; gap: 10px;">
-                <button class="btn btn-primary" onclick="fileManager.downloadFile('${url}', '${filename}')">
-                    📥 Télécharger
-                </button>
-                <button class="btn btn-secondary" onclick="this.closest('.preview-modal').remove()">
-                    Fermer
-                </button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-};
-
-FileManager.prototype.createModal = function() {
-    const modal = document.createElement('div');
-    modal.className = 'preview-modal';
-    modal.style.cssText = `
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.8); backdrop-filter: blur(10px);
-        display: flex; align-items: center; justify-content: center;
-        z-index: 10000; padding: 20px;
-    `;
-    return modal;
-};
-
-FileManager.prototype.downloadFile = function(url, filename) {
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    link.click();
-};
-
-// =============================================
-// SYSTÈME DE RECHERCHE AVANCÉ (index.html)
-// =============================================
-class SearchSystem {
-    constructor(fileManager) {
-        this.fileManager = fileManager;
-        this.searchInput = document.getElementById('searchInput');
-        this.resultsContainer = document.getElementById('resultsContainer');
-        this.welcomeSection = document.querySelector('.welcome-section');
-        this.init();
-    }
-
-    init() {
-        if (this.searchInput && this.resultsContainer) {
-            this.searchInput.addEventListener('input', (e) => {
-                this.performSearch(e.target.value);
-            });
-            
-            // Recherche à la touche Entrée
-            this.searchInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    this.performSearch(e.target.value);
-                }
-            });
-        }
-    }
-
-    performSearch(query) {
-        const results = this.fileManager.searchFiles(query);
-        this.displayResults(results, query);
-    }
-
-    displayResults(files, query) {
-        // Gérer l'affichage de la section de bienvenue
-        if (this.welcomeSection) {
-            if (!query.trim()) {
-                this.welcomeSection.style.display = 'block';
-                this.resultsContainer.innerHTML = '<p class="no-results">Tapez quelque chose pour rechercher...</p>';
-                return;
-            } else {
-                this.welcomeSection.style.display = 'none';
-            }
-        }
-
-        if (files.length === 0) {
-            this.resultsContainer.innerHTML = `
-                <div class="no-results">
-                    <h3>🔍 Aucun résultat trouvé</h3>
-                    <p>Aucun fichier ne correspond à "<strong>${query}</strong>"</p>
-                    <p class="search-tips">
-                        <strong>Conseils de recherche :</strong><br>
-                        • Vérifiez l'orthographe<br>
-                        • Utilisez des termes plus généraux<br>
-                        • Recherchez un seul mot à la fois
-                    </p>
-                </div>
-            `;
-            return;
-        }
-
-        this.resultsContainer.innerHTML = `
-            <div class="search-info-bar">
-                <p>${files.length} résultat(s) trouvé(s) pour "<strong>${query}</strong>"</p>
-            </div>
-            ${files.map(file => {
-                const isPDF = file.type === 'PDF';
-                const isAudio = file.type === 'Audio';
-                const isText = file.type === 'Texte' || file.type === 'Document';
-                
-                return `
-                    <div class="file-card" data-type="${file.type}">
-                        <div class="file-header">
-                            <div class="file-icon">${this.fileManager.getFileIcon(file.type)}</div>
-                            <div class="file-info">
-                                <div class="file-name">${this.highlightMatch(file.name, query)}</div>
-                                <div class="file-type">${file.type} • ${this.formatSize(file.size)}</div>
-                                <div class="file-date">Ajouté le ${file.lastModified}</div>
-                                ${this.getContentPreview(file, query)}
-                            </div>
-                        </div>
-                        <div class="file-actions ${isAudio ? 'file-actions-compact' : ''}">
-                            ${isAudio ? `
-                                <button class="btn-play" onclick="fileManager.previewFile('${file.rawUrl}', '${file.type}', '${file.name}', '${query}')">
-                                    ▶
-                                </button>
-                                <button class="btn btn-primary" onclick="fileManager.downloadFile('${file.rawUrl}', '${file.name}')">
-                                    📥 Télécharger
-                                </button>
-                            ` : `
-                                <button class="btn btn-primary" onclick="fileManager.previewFile('${file.rawUrl}', '${file.type}', '${file.name}', '${query}')">
-                                    ${isPDF ? '📖 Ouvrir' : isText ? '📝 Ouvrir' : '👁️ Ouvrir'}
-                                </button>
-                                ${!isPDF ? `
-                                    <button class="btn btn-secondary" onclick="fileManager.downloadFile('${file.rawUrl}', '${file.name}')">
-                                        📥 Télécharger
-                                    </button>
-                                ` : ''}
-                            `}
-                        </div>
-                    </div>
-                `;
-            }).join('')}
-        `;
-    }
-
-    // Surligner les correspondances dans le nom
-    highlightMatch(text, query) {
-        if (!query.trim()) return text;
-        
-        const terms = query.toLowerCase().split(/\s+/);
-        let highlighted = text;
-        
-        terms.forEach(term => {
-            if (term.length > 0) {
-                const regex = new RegExp(`(${this.escapeRegex(term)})`, 'gi');
-                highlighted = highlighted.replace(regex, '<mark class="name-highlight">$1</mark>');
-            }
-        });
-        
-        return highlighted;
-    }
-
-    // Aperçu du contenu avec surlignage
-    getContentPreview(file, query) {
-        if (!file.searchableContent || file.searchableContent === file.name) return '';
-        
-        const terms = query.toLowerCase().split(/\s+/);
-        let content = file.searchableContent;
-        
-        // Surligner les correspondances
-        terms.forEach(term => {
-            if (term.length > 0) {
-                const regex = new RegExp(`(${this.escapeRegex(term)})`, 'gi');
-                content = content.replace(regex, '<mark class="content-highlight">$1</mark>');
-            }
-        });
-        
-        // Prendre un extrait autour de la première correspondance
-        const firstMatch = content.indexOf('<mark class="content-highlight">');
-        if (firstMatch !== -1) {
-            const start = Math.max(0, firstMatch - 50);
-            const end = Math.min(content.length, firstMatch + 150);
-            let excerpt = content.substring(start, end);
-            
-            if (start > 0) excerpt = '...' + excerpt;
-            if (end < content.length) excerpt = excerpt + '...';
-            
-            return `<div class="file-content-preview">${excerpt}</div>`;
-        }
-        
-        // Si pas de correspondance, prendre le début
-        if (content.length > 150) {
-            return `<div class="file-content-preview">${content.substring(0, 150)}...</div>`;
-        }
-        
-        return `<div class="file-content-preview">${content}</div>`;
-    }
-
-    escapeRegex(string) {
-        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    }
-
-    formatSize(bytes) {
-        if (!bytes) return 'Taille inconnue';
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(1024));
-        return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
-    }
 }
 
-// =============================================
-// SYSTÈME DOSSIER (dossier.html) - VERSION SIMPLIFIÉE
-// =============================================
-class DossierSystem {
-    constructor(fileManager) {
-        this.fileManager = fileManager;
-        this.filesContainer = document.getElementById('filesContainer');
-        this.init();
-    }
-
-    init() {
-        if (this.filesContainer) {
-            this.displayAllFiles();
-        }
-    }
-
-    displayAllFiles() {
-        if (this.fileManager.files.length === 0) {
-            this.filesContainer.innerHTML = '<p class="no-results">Aucun fichier trouvé</p>';
-            return;
-        }
-
-        this.filesContainer.innerHTML = `
-            <div class="file-row">
-                ${this.fileManager.files.map(file => {
-                    const isPDF = file.type === 'PDF';
-                    const isAudio = file.type === 'Audio';
-                    
-                    return `
-                        <div class="file-card" data-type="${file.type}">
-                            <div class="file-header">
-                                <div class="file-icon">${this.fileManager.getFileIcon(file.type)}</div>
-                                <div class="file-info">
-                                    <div class="file-name">${file.name}</div>
-                                    <div class="file-type">${file.type} • ${this.formatSize(file.size)}</div>
-                                    <div class="file-date">Ajouté le ${file.lastModified}</div>
-                                </div>
-                            </div>
-                            <div class="file-actions ${isAudio ? 'file-actions-compact' : ''}">
-                                ${isAudio ? `
-                                    <button class="btn-play" onclick="fileManager.previewFile('${file.rawUrl}', '${file.type}', '${file.name}')">
-                                        ▶
-                                    </button>
-                                    <button class="btn btn-primary" onclick="fileManager.downloadFile('${file.rawUrl}', '${file.name}')">
-                                        📥 Télécharger
-                                    </button>
-                                ` : `
-                                    <button class="btn btn-primary" onclick="fileManager.previewFile('${file.rawUrl}', '${file.type}', '${file.name}')">
-                                        ${isPDF ? '📖 Ouvrir' : '👁️ Ouvrir'}
-                                    </button>
-                                `}
-                            </div>
-                        </div>
-                    `;
-                }).join('')}
-            </div>
-        `;
-    }
-
-    formatSize(bytes) {
-        if (!bytes) return 'Taille inconnue';
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(1024));
-        return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
-    }
-}
-
-// =============================================
-// DÉTECTION DE PAGE ET INITIALISATION
-// =============================================
-FileManager.prototype.detectPageAndInit = function() {
-    const currentPage = window.location.pathname.split('/').pop();
+// Obtenir le type de filtre
+function getFilterType(text) {
+    // Nettoyer le texte (enlever les icônes et HTML)
+    const cleanText = text.trim()
+        .replace(/<i.*?>.*?<\/i>/g, '')
+        .replace(/[^a-zA-ZÀ-ÿ\s]/g, '')
+        .trim();
     
-    if (currentPage === 'index.html' || currentPage === '') {
-        this.searchSystem = new SearchSystem(this);
-    } else if (currentPage === 'dossier.html') {
-        this.dossierSystem = new DossierSystem(this);
+    const map = {
+        'Toutes': 'all',
+        'Tous': 'all',
+        'Géométrie': 'géométrie',
+        'Analyse': 'analyse',
+        'Physique': 'physique',
+        'Chimie': 'chimie'
+    };
+    
+    return map[cleanText] || 'all';
+}
+
+// Changer d'onglet
+function switchTab(tab) {
+    console.log(`Onglet activé: ${tab}`);
+    
+    // Ici vous pourriez ajouter la logique pour changer de page
+    switch(tab) {
+        case 'recherche':
+            // Déjà sur la page recherche
+            break;
+        case 'exercice':
+            alert('Page Exercice - À implémenter');
+            break;
+        case 'profil':
+            alert('Page Profil - À implémenter');
+            break;
     }
-};
+}
 
-// =============================================
-// INITIALISATION AU CHARGEMENT
-// =============================================
-document.addEventListener('DOMContentLoaded', function() {
-    // Animation d'entrée
-    setTimeout(() => {
-        document.body.style.opacity = '1';
-    }, 100);
+// Fonction pour effacer la recherche
+function clearSearch() {
+    mainSearch.value = '';
+    showWelcomePage();
+    mainSearch.focus();
+}
 
-    // Initialisation des systèmes
-    initNavigation();
-    window.fileManager = new FileManager();
-});
+// Exposer certaines fonctions globalement (pour débogage)
+window.clearSearch = clearSearch;
+window.showWelcomePage = showWelcomePage;
+window.performSearch = performSearch;

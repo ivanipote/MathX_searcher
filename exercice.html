@@ -1,1 +1,326 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MathLab - Exercices Pratiques</title>
+    
+    <!-- Styles communs (navigation) -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Style spécifique à la page exercice -->
+    <link rel="stylesheet" href="style/exercice.css">
+    
+    <!-- Fonts et Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- MathJax pour les formules dans les .txt -->
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']],
+          processEscapes: true
+        },
+        options: {
+          skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+          ignoreHtmlClass: 'no-mathjax'
+        }
+      };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+</head>
+<body>
+    <!-- Overlay pour le menu -->
+    <div class="overlay" id="overlay"></div>
 
+    <!-- Header avec effet de verre -->
+    <header class="glass-header">
+        <div class="header-container">
+            <!-- Sidebar Hamburger -->
+            <button class="hamburger-btn" id="hamburgerBtn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <!-- Barre de recherche au centre -->
+            <div class="search-bar">
+                <div class="search-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input 
+                        type="text" 
+                        id="mainSearch" 
+                        placeholder="Rechercher un exercice..."
+                        autocomplete="off"
+                    >
+                    <div class="search-actions">
+                        <button class="search-btn" id="searchBtn">
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Logo à droite -->
+            <div class="logo-container">
+                <img src="logo.png" alt="MathLab Logo" class="site-logo">
+                <span class="site-name">MathLab</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar (identique à index.html) -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <img src="logo.png" alt="Logo" class="sidebar-logo">
+            <h3>MathLab</h3>
+            <button class="close-sidebar" id="closeSidebar">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="sidebar-menu">
+            <a href="index.html" class="menu-item">
+                <i class="fas fa-home"></i>
+                <span>Accueil</span>
+            </a>
+            <a href="exercice.html" class="menu-item active">
+                <i class="fas fa-pen-fancy"></i>
+                <span>Exercices</span>
+            </a>
+            <a href="profil.html" class="menu-item">
+                <i class="fas fa-user-circle"></i>
+                <span>Profil</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fas fa-book"></i>
+                <span>Cours</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fas fa-star"></i>
+                <span>Favoris</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fas fa-cog"></i>
+                <span>Paramètres</span>
+            </a>
+        </div>
+        
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-info">
+                    <strong>Étudiant</strong>
+                    <small>Connecté</small>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenu principal -->
+    <main class="main-content">
+        <!-- Section description -->
+        <section class="description-section">
+            <div class="description-content">
+                <h1><i class="fas fa-pen-fancy"></i> Exercices Pratiques</h1>
+                <p>
+                    Trouvez des exercices de mathématiques et physique-chimie pour vous entraîner.
+                    Recherchez par nom, filtrez par type de fichier, et téléchargez ou consultez directement.
+                </p>
+                <div class="description-features">
+                    <div class="feature">
+                        <i class="fas fa-file-pdf"></i>
+                        <span>PDF</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-file-alt"></i>
+                        <span>TXT</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-image"></i>
+                        <span>Images</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-calculator"></i>
+                        <span>MathJax</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Filtres par type -->
+        <div class="filters-section">
+            <div class="filters-container">
+                <span class="filters-label">Filtrer par type :</span>
+                <div class="filters-group">
+                    <button class="type-filter active" data-type="all">
+                        <i class="fas fa-layer-group"></i> Tous
+                    </button>
+                    <button class="type-filter" data-type="pdf">
+                        <i class="fas fa-file-pdf"></i> PDF
+                    </button>
+                    <button class="type-filter" data-type="txt">
+                        <i class="fas fa-file-alt"></i> TXT
+                    </button>
+                    <button class="type-filter" data-type="image">
+                        <i class="fas fa-image"></i> Images
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Résultats -->
+        <div class="results-section">
+            <div class="section-header">
+                <h2><i class="fas fa-search"></i> Résultats</h2>
+                <span class="results-count" id="resultsCount">0 exercice(s) trouvé(s)</span>
+            </div>
+            
+            <div id="resultsContainer" class="results-container">
+                <!-- Message d'accueil -->
+                <div class="welcome-message">
+                    <div class="welcome-icon">
+                        <i class="fas fa-pen-fancy"></i>
+                    </div>
+                    <h3>Recherchez des exercices</h3>
+                    <p>Tapez le nom d'un exercice dans la barre de recherche ci-dessus</p>
+                    <div class="welcome-examples">
+                        <span class="example-tag">Pythagore</span>
+                        <span class="example-tag">Équations</span>
+                        <span class="example-tag">Dérivées</span>
+                        <span class="example-tag">Lois de Newton</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Templates pour les résultats (AJOUT CRITIQUE!) -->
+        <div style="display: none;">
+            <!-- Template PDF -->
+            <template id="pdfTemplate">
+                <div class="exercise-card pdf-card">
+                    <div class="card-header">
+                        <div class="file-icon">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <div class="file-info">
+                            <h3 class="exercise-title"></h3>
+                            <div class="file-meta">
+                                <span class="file-type">PDF</span>
+                                <span class="file-category"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="exercise-description"></p>
+                    </div>
+                    <div class="card-footer">
+                        <button class="action-btn open-btn">
+                            <i class="fas fa-external-link-alt"></i> Ouvrir
+                        </button>
+                        <button class="action-btn download-btn">
+                            <i class="fas fa-download"></i> Télécharger
+                        </button>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Template Image -->
+            <template id="imageTemplate">
+                <div class="exercise-card image-card">
+                    <div class="card-header">
+                        <div class="file-icon">
+                            <i class="fas fa-image"></i>
+                        </div>
+                        <div class="file-info">
+                            <h3 class="exercise-title"></h3>
+                            <div class="file-meta">
+                                <span class="file-type">Image</span>
+                                <span class="file-category"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="image-preview">
+                            <img class="preview-img" alt="Aperçu">
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button class="action-btn open-btn">
+                            <i class="fas fa-external-link-alt"></i> Ouvrir
+                        </button>
+                        <button class="action-btn download-btn">
+                            <i class="fas fa-download"></i> Télécharger
+                        </button>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Template Texte -->
+            <template id="txtTemplate">
+                <div class="exercise-card txt-card">
+                    <div class="card-header">
+                        <div class="file-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="file-info">
+                            <h3 class="exercise-title"></h3>
+                            <div class="file-meta">
+                                <span class="file-type">Texte</span>
+                                <span class="file-category"></span>
+                                <span class="file-size"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-content"></div>
+                    </div>
+                    <div class="card-footer">
+                        <button class="action-btn open-btn">
+                            <i class="fas fa-external-link-alt"></i> Ouvrir
+                        </button>
+                        <button class="action-btn download-btn">
+                            <i class="fas fa-download"></i> Télécharger
+                        </button>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </main>
+
+    <!-- Barre de navigation inférieure -->
+    <nav class="bottom-nav">
+        <div class="nav-container">
+            <a href="index.html" class="nav-item" data-tab="recherche">
+                <div class="nav-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <span class="nav-label">Recherche</span>
+                <div class="nav-indicator"></div>
+            </a>
+            
+            <a href="exercice.html" class="nav-item active" data-tab="exercice">
+                <div class="nav-icon">
+                    <i class="fas fa-pen-fancy"></i>
+                </div>
+                <span class="nav-label">Exercice</span>
+                <div class="nav-indicator"></div>
+            </a>
+            
+            <a href="profil.html" class="nav-item" data-tab="profil">
+                <div class="nav-icon">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <span class="nav-label">Profil</span>
+                <div class="nav-indicator"></div>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Scripts -->
+    <script src="script/exercice.js"></script>
+</body>
+</html>

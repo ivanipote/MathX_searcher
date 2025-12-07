@@ -3,167 +3,226 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mégane - Recherche</title>
+    <title>MathLab - Formules Mathématiques & Physique</title>
+    
+    <!-- Styles -->
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- MathJax -->
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']],
+          processEscapes: true
+        },
+        options: {
+          skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+          ignoreHtmlClass: 'no-mathjax'
+        }
+      };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 </head>
 <body>
-    <!-- Header unifié avec fond flou -->
-    <header class="main-header">
-        <!-- Sidebar à gauche -->
-        <div class="header-left">
-            <div class="sidebar-toggle" id="sidebarToggle">
-                <div class="hamburger"></div>
-                <div class="hamburger"></div>
-                <div class="hamburger"></div>
-            </div>
-        </div>
-
-        <!-- Logo à droite -->
-        <div class="header-right">
-            <div class="logo-container">
-                <img src="logo.png" alt="Logo Mégane" class="logo">
-            </div>
-            <div class="site-name">Mégane</div>
-        </div>
-    </header>
-
-    <!-- Barre de recherche -->
-    <div class="search-bar" id="searchBar">
-        <div class="search-container">
-            <div class="search-icon">🔍</div>
-            <input type="text" class="search-input" placeholder="Rechercher un fichier..." id="searchInput">
-        </div>
-    </div>
-
-    <!-- Sidebar Simple -->
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <h2>Menu</h2>
-        </div>
-        <ul class="sidebar-menu">
-            <li><a href="index.html" class="active">
-                <span class="menu-icon">🏠</span>
-                <span class="menu-text">Accueil</span>
-            </a></li>
-            <li><a href="a-propos.html">
-                <span class="menu-icon">ℹ️</span>
-                <span class="menu-text">À propos</span>
-            </a></li>
-            <li><a href="confidentialite.html">
-                <span class="menu-icon">🔒</span>
-                <span class="menu-text">Confidentialité</span>
-            </a></li>
-            <li><a href="contact.html">
-                <span class="menu-icon">📞</span>
-                <span class="menu-text">Contact</span>
-            </a></li>
-        </ul>
-    </div>
-
-    <!-- Overlay -->
+    <!-- Overlay pour le menu -->
     <div class="overlay" id="overlay"></div>
 
-    <!-- Contenu principal -->
-    <div class="main-content">
-        <div class="content-area">
-            <!-- Section de présentation -->
-            
-            <div class="welcome-section">
-                <div class="welcome-content">
-                   <h1>MG23</h1>
-                   
-                    <p class="welcome-subtitle">Votre plateforme de gestion de fichiers intelligente</p>
-                    
-                    <div class="features-grid">
-                        <div class="feature-card">
-                            <div class="feature-icon">🔍</div>
-                            <h3>Recherche Avancée</h3>
-                            <p>Trouvez rapidement vos fichiers grâce à notre moteur de recherche performant et intuitif.</p>
-                        </div>
-                        
-                        <div class="feature-card">
-                            <div class="feature-icon">📁</div>
-                            <h3>Organisation Simplifiée</h3>
-                            <p>Accédez à tous vos documents organisés de manière claire dans l'onglet Dossier.</p>
-                        </div>
-                        
-                        <div class="feature-card">
-                            <div class="feature-icon">☁️</div>
-                            <h3>Stockage Cloud</h3>
-                            <p>Sauvegardez et synchronisez vos fichiers en toute sécurité sur le cloud.</p>
-                        </div>
-                    </div>
+    <!-- Header avec effet de verre -->
+    <header class="glass-header">
+        <div class="header-container">
+            <!-- Sidebar Hamburger -->
+            <button class="hamburger-btn" id="hamburgerBtn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
 
-                    <div class="about-section">
-                        <h2>📖 À propos de Mégane</h2>
-                        <p>
-                            <strong>Mégane</strong> est une plateforme moderne conçue pour simplifier la gestion 
-                            et l'accès à vos fichiers. Que vous soyez étudiant, professionnel ou simplement 
-                            à la recherche d'une solution de stockage efficace, Mégane répond à tous vos besoins.
-                        </p>
-                        
-                        <div class="key-points">
-                            <div class="key-point">
-                                <span class="point-icon">🚀</span>
-                                <span>Interface rapide et fluide</span>
-                            </div>
-                            <div class="key-point">
-                                <span class="point-icon">🎯</span>
-                                <span>Recherche précise et instantanée</span>
-                            </div>
-                            <div class="key-point">
-                                <span class="point-icon">🔒</span>
-                                <span>Sécurité et confidentialité garanties</span>
-                            </div>
-                            <div class="key-point">
-                                <span class="point-icon">💫</span>
-                                <span>Design moderne et élégant</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="getting-started">
-                        <h2>🎯 Comment commencer ?</h2>
-                        <ol class="steps-list">
-                            <li>
-                                <strong>Recherchez</strong> : Utilisez la barre de recherche ci-dessus pour trouver un fichier spécifique
-                            </li>
-                            <li>
-                                <strong>Explorez</strong> : Parcourez tous vos fichiers dans l'onglet "Dossier"
-                            </li>
-                            <li>
-                                <strong>Gérez</strong> : Organisez et téléchargez vos documents en quelques clics
-                            </li>
-                        </ol>
+            <!-- Barre de recherche au centre -->
+            <div class="search-bar">
+                <div class="search-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input 
+                        type="text" 
+                        id="mainSearch" 
+                        placeholder="Rechercher une formule..."
+                        autocomplete="off"
+                    >
+                    <div class="search-actions">
+                        <button class="search-btn" id="searchBtn">
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Résultats de recherche -->
-            <div class="results-container" id="resultsContainer">
-                <!-- Les résultats de recherche apparaîtront ici lors d'une recherche -->
+            <!-- Logo à droite -->
+            <div class="logo-container">
+                <img src="logo.png" alt="MathLab Logo" class="site-logo">
+                <span class="site-name">MathLab</span>
             </div>
         </div>
-    </div>
+    </header>
 
-    <!-- Barre de navigation en bas -->
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <img src="logo.png" alt="Logo" class="sidebar-logo">
+            <h3>MathLab</h3>
+            <button class="close-sidebar" id="closeSidebar">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="sidebar-menu">
+            <a href="#" class="menu-item active">
+                <i class="fas fa-home"></i>
+                <span>Accueil</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fas fa-book"></i>
+                <span>Formules</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Cours</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fas fa-star"></i>
+                <span>Favoris</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fas fa-history"></i>
+                <span>Historique</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fas fa-cog"></i>
+                <span>Paramètres</span>
+            </a>
+        </div>
+        
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-info">
+                    <strong>Megane_search User</strong>
+                    <small>Étudiant</small>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenu principal -->
+    <main class="main-content">
+        <div class="page-title">
+            <h1><i class="fas fa-search"></i> Recherche de Formules</h1>
+            <p>Trouvez rapidement les formules de mathématiques et physique</p>
+        </div>
+
+        <!-- Filtres rapides -->
+        <div class="quick-filters">
+            <button class="filter-btn active">
+                <i class="fas fa-calculator"></i> Toutes
+            </button>
+            <button class="filter-btn">
+                <i class="fas fa-shapes"></i> Géométrie
+            </button>
+            <button class="filter-btn">
+                <i class="fas fa-chart-line"></i> Analyse
+            </button>
+            <button class="filter-btn">
+                <i class="fas fa-atom"></i> Physique
+            </button>
+            <button class="filter-btn">
+                <i class="fas fa-flask"></i> Chimie
+            </button>
+        </div>
+
+        <!-- Résultats -->
+        <div class="results-section">
+            <div class="section-header">
+                <h2>Formules Trouvées</h2>
+                <span class="results-count" id="resultsCount">0 résultat(s)</span>
+            </div>
+            
+            <div id="resultsContainer" class="results-container">
+                <!-- Les résultats apparaîtront ici -->
+                <div class="welcome-message">
+                    <div class="welcome-icon">
+                        <i class="fas fa-square-root-alt"></i>
+                    </div>
+                    <h3>Bienvenue sur MathLab</h3>
+                    <p>Commencez à taper dans la barre de recherche pour trouver des formules</p>
+                    <div class="welcome-examples">
+                        <span class="example-tag">Pythagore</span>
+                        <span class="example-tag">Énergie cinétique</span>
+                        <span class="example-tag">Dérivée</span>
+                        <span class="example-tag">Loi d'Ohm</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+  <!-- Carte de formule exemple (cachée par défaut) -->
+<template id="formulaTemplate">
+    <div class="formula-card">
+        <div class="formula-header">
+            <div class="formula-title-section">
+                <h3 class="formula-title"></h3>
+                <span class="formula-category"></span>
+            </div>
+            <button class="favorite-btn">
+                <i class="far fa-star"></i>
+            </button>
+        </div>
+        
+        <div class="formula-content">
+            <div class="formula-display"></div>
+            
+            <div class="formula-description"></div>
+        </div>
+        
+        <div class="formula-footer">
+            <div class="formula-source">
+                <i class="fas fa-tag"></i>
+                <span class="source-type"></span>
+            </div>
+            <!-- BOUTON DÉTAILS SUPPRIMÉ -->
+        </div>
+    </div>
+</template>
+    <!-- Barre de navigation inférieure -->
     <nav class="bottom-nav">
-        <a href="index.html" class="nav-item active">
-            <div class="nav-icon">🔍</div>
-            <span>Recherche</span>
-        </a>
-        <a href="dossier.html" class="nav-item">
-            <div class="nav-icon">📁</div>
-            <span>Dossier</span>
-        </a>
-        <a href="cloud.html" class="nav-item">
-            <div class="nav-icon">☁️</div>
-            <span>Cloud</span>
-        </a>
-        <a href="profil.html" class="nav-item">
-            <div class="nav-icon">👤</div>
-            <span>Profil</span>
-        </a>
+        <div class="nav-container">
+            <a href="#" class="nav-item active" data-tab="recherche">
+                <div class="nav-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <span class="nav-label">Recherche</span>
+                <div class="nav-indicator"></div>
+            </a>
+            
+            <a href="#" class="nav-item" data-tab="exercice">
+                <div class="nav-icon">
+                    <i class="fas fa-pen-fancy"></i>
+                </div>
+                <span class="nav-label">Exercice</span>
+                <div class="nav-indicator"></div>
+                
+            </a>
+            
+            <a href="exercice.html" class="nav-item" data-tab="profil">
+                <div class="nav-icon">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <span class="nav-label">Profil</span>
+                <div class="nav-indicator"></div>
+            </a>
+        </div>
     </nav>
 
     <script src="script.js"></script>
