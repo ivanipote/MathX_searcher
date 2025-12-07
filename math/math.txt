@@ -1,1 +1,388 @@
-ok
+//Pythagore//
+TITRE: Théorème de Pythagore
+FORMULE: $a^2 + b^2 = c^2$
+DESCRIPTION: Dans un triangle rectangle, le carré de l'hypoténuse est égal à la somme des carrés des côtés
+CATEGORIE: géométrie
+---
+TITRE: Réciproque du théorème de Pythagore
+FORMULE: $a^2 + b^2 = c^2$
+DESCRIPTION: Si dans un triangle le carré d'un côté est égal à la somme des carrés des deux autres côtés, alors ce triangle est rectangle
+CATEGORIE: géométrie
+---
+//Thalès//
+TITRE: Théorème de Thalès
+FORMULE: $\frac{MA}{MB} = \frac{NA}{NC} = \frac{MN}{BC}$
+DESCRIPTION: Dans un triangle coupé par une droite parallèle à un côté, les rapports de longueurs sont égaux
+CATEGORIE: géométrie
+---
+TITRE: Réciproque du théorème de Thalès
+FORMULE: $\frac{MA}{MB} = \frac{NA}{NC}$
+DESCRIPTION: Si les rapports des segments sont égaux et si les points sont alignés dans le bon ordre, alors les droites sont parallèles
+CATEGORIE: géométrie
+---
+//Dérivées//
+TITRE: Dérivée d'une puissance
+FORMULE: $\frac{d}{dx}(x^n) = n \cdot x^{n-1}$
+DESCRIPTION: Règle de dérivation des fonctions puissance
+CATEGORIE: analyse
+---
+TITRE: Dérivée du produit
+FORMULE: $(uv)' = u'v + uv'$
+DESCRIPTION: Règle de dérivation du produit de deux fonctions
+CATEGORIE: analyse
+---
+TITRE: Dérivée du quotient
+FORMULE: $\left(\frac{u}{v}\right)' = \frac{u'v - uv'}{v^2}$
+DESCRIPTION: Règle de dérivation d'un quotient de deux fonctions
+CATEGORIE: analyse
+---
+TITRE: Dérivée de l'exponentielle
+FORMULE: $\frac{d}{dx}(e^x) = e^x$
+DESCRIPTION: La fonction exponentielle est sa propre dérivée
+CATEGORIE: analyse
+---
+TITRE: Dérivée du logarithme népérien
+FORMULE: $\frac{d}{dx}(\ln x) = \frac{1}{x}$
+DESCRIPTION: Dérivée de la fonction logarithme népérien
+CATEGORIE: analyse
+---
+//Limites//
+TITRE: Limite fondamentale
+FORMULE: $\lim_{x \to 0} \frac{\sin(x)}{x} = 1$
+DESCRIPTION: Limite classique utilisée dans le calcul de la dérivée de la fonction sinus
+CATEGORIE: analyse
+---
+TITRE: Limite de l'exponentielle
+FORMULE: $\lim_{x \to +\infty} e^x = +\infty$
+DESCRIPTION: Comportement asymptotique de la fonction exponentielle
+CATEGORIE: analyse
+---
+TITRE: Limite du logarithme
+FORMULE: $\lim_{x \to +\infty} \ln x = +\infty$
+DESCRIPTION: Comportement asymptotique de la fonction logarithme népérien
+CATEGORIE: analyse
+---
+//Algèbre//
+TITRE: Formule quadratique
+FORMULE: $x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$
+DESCRIPTION: Solution de l'équation du second degré
+CATEGORIE: algèbre
+---
+TITRE: Identité remarquable - Carré d'une somme
+FORMULE: $(a + b)^2 = a^2 + 2ab + b^2$
+DESCRIPTION: Développement du carré d'une somme
+CATEGORIE: algèbre
+---
+TITRE: Identité remarquable - Carré d'une différence
+FORMULE: $(a - b)^2 = a^2 - 2ab + b^2$
+DESCRIPTION: Développement du carré d'une différence
+CATEGORIE: algèbre
+---
+TITRE: Formule du binôme de Newton
+FORMULE: $(a + b)^n = \sum_{k=0}^{n} \binom{n}{k} a^{n-k} b^k$
+DESCRIPTION: Développement d'une puissance d'une somme
+CATEGORIE: algèbre
+---
+//Géométrie avancée//
+TITRE: Théorème d'Al-Kashi (loi des cosinus)
+FORMULE: $c^2 = a^2 + b^2 - 2ab \cos(\gamma)$
+DESCRIPTION: Généralisation du théorème de Pythagore pour un triangle quelconque
+CATEGORIE: géométrie
+---
+TITRE: Formule de l'aire du cercle
+FORMULE: $A = \pi r^2$
+DESCRIPTION: Aire d'un cercle en fonction de son rayon
+CATEGORIE: géométrie
+---
+TITRE: Formule du volume de la sphère
+FORMULE: $V = \frac{4}{3} \pi r^3$
+DESCRIPTION: Volume d'une sphère en fonction de son rayon
+CATEGORIE: géométrie
+---
+//Analyse avancée//
+TITRE: Formule de l'intégrale d'une puissance
+FORMULE: $\int x^n \, dx = \frac{x^{n+1}}{n+1} + C \quad (n \neq -1)$
+DESCRIPTION: Primitive d'une fonction puissance
+CATEGORIE: analyse
+---
+TITRE: Formule de l'intégrale de 1/x
+FORMULE: $\int \frac{1}{x} \, dx = \ln|x| + C$
+DESCRIPTION: Primitive de la fonction inverse
+CATEGORIE: analyse
+---
+TITRE: Formule de l'intégrale de l'exponentielle
+FORMULE: $\int e^x \, dx = e^x + C$
+DESCRIPTION: Primitive de la fonction exponentielle
+CATEGORIE: analyse
+---
+//Identités célèbres//
+TITRE: Identité d'Euler
+FORMULE: $e^{i\pi} + 1 = 0$
+DESCRIPTION: Relation célèbre reliant cinq constantes mathématiques fondamentales
+CATEGORIE: analyse
+---
+TITRE: Formule d'Euler
+FORMULE: $e^{i\theta} = \cos\theta + i\sin\theta$
+DESCRIPTION: Relation fondamentale entre l'exponentielle complexe et les fonctions trigonométriques
+CATEGORIE: analyse
+
+//Relations fondamentales//
+TITRE: Identité trigonométrique fondamentale
+FORMULE: $\sin^2(x) + \cos^2(x) = 1$
+DESCRIPTION: Relation fondamentale entre le sinus et le cosinus d'un même angle
+CATEGORIE: trigonométrie
+---
+TITRE: Formule avec tangente
+FORMULE: $1 + \tan^2(x) = \frac{1}{\cos^2(x)}$
+DESCRIPTION: Relation dérivée de l'identité fondamentale, faisant intervenir la tangente
+CATEGORIE: trigonométrie
+---
+//Formules d'addition//
+TITRE: Sinus d'une somme
+FORMULE: $\sin(a + b) = \sin(a)\cos(b) + \cos(a)\sin(b)$
+DESCRIPTION: Formule donnant le sinus de la somme de deux angles
+CATEGORIE: trigonométrie
+---
+TITRE: Cosinus d'une somme
+FORMULE: $\cos(a + b) = \cos(a)\cos(b) - \sin(a)\sin(b)$
+DESCRIPTION: Formule donnant le cosinus de la somme de deux angles
+CATEGORIE: trigonométrie
+---
+TITRE: Tangente d'une somme
+FORMULE: $\tan(a + b) = \frac{\tan(a) + \tan(b)}{1 - \tan(a)\tan(b)}$
+DESCRIPTION: Formule donnant la tangente de la somme de deux angles
+CATEGORIE: trigonométrie
+---
+//Formules de duplication//
+TITRE: Sinus du double angle
+FORMULE: $\sin(2a) = 2\sin(a)\cos(a)$
+DESCRIPTION: Expression du sinus de l'angle double
+CATEGORIE: trigonométrie
+---
+TITRE: Cosinus du double angle
+FORMULE: $\cos(2a) = \cos^2(a) - \sin^2(a)$
+DESCRIPTION: Expression du cosinus de l'angle double
+CATEGORIE: trigonométrie
+---
+TITRE: Autre forme du cosinus double
+FORMULE: $\cos(2a) = 2\cos^2(a) - 1 = 1 - 2\sin^2(a)$
+DESCRIPTION: Formules équivalentes pour le cosinus de l'angle double
+CATEGORIE: trigonométrie
+---
+//Formules de linéarisation//
+TITRE: Carré du sinus
+FORMULE: $\sin^2(a) = \frac{1 - \cos(2a)}{2}$
+DESCRIPTION: Permet de linéariser le carré du sinus
+CATEGORIE: trigonométrie
+---
+TITRE: Carré du cosinus
+FORMULE: $\cos^2(a) = \frac{1 + \cos(2a)}{2}$
+DESCRIPTION: Permet de linéariser le carré du cosinus
+CATEGORIE: trigonométrie
+---
+//Formules de transformation (produit/somme)//
+TITRE: Produit en somme (sinus)
+FORMULE: $\sin(p)\sin(q) = \frac{1}{2}[\cos(p-q) - \cos(p+q)]$
+DESCRIPTION: Transforme un produit de sinus en somme de cosinus
+CATEGORIE: trigonométrie
+---
+TITRE: Produit en somme (cosinus)
+FORMULE: $\cos(p)\cos(q) = \frac{1}{2}[\cos(p+q) + \cos(p-q)]$
+DESCRIPTION: Transforme un produit de cosinus en somme de cosinus
+CATEGORIE: trigonométrie
+---
+TITRE: Produit en somme (sinus et cosinus)
+FORMULE: $\sin(p)\cos(q) = \frac{1}{2}[\sin(p+q) + \sin(p-q)]$
+DESCRIPTION: Transforme un produit mixte en somme de sinus
+CATEGORIE: trigonométrie
+---
+//Valeurs remarquables (exemple)//
+TITRE: Valeur de sinus(π/4)
+FORMULE: $\sin\left(\frac{\pi}{4}\right) = \frac{\sqrt{2}}{2}$
+DESCRIPTION: Valeur du sinus pour un angle de 45 degrés (π/4 radians)
+CATEGORIE: trigonométrie
+---
+TITRE: Valeur de cosinus(π/3)
+FORMULE: $\cos\left(\frac{\pi}{3}\right) = \frac{1}{2}$
+DESCRIPTION: Valeur du cosinus pour un angle de 60 degrés (π/3 radians)
+CATEGORIE: trigonométrie
+---
+//Relations dans le triangle//
+TITRE: Loi des sinus
+FORMULE: $\frac{a}{\sin(A)} = \frac{b}{\sin(B)} = \frac{c}{\sin(C)} = 2R$
+DESCRIPTION: Relation entre les côtés d'un triangle et les sinus des angles opposés (R est le rayon du cercle circonscrit)
+CATEGORIE: trigonométrie
+---
+TITRE: Loi des cosinus (Al-Kashi)
+FORMULE: $a^2 = b^2 + c^2 - 2bc\cos(A)$
+DESCRIPTION: Généralisation du théorème de Pythagore pour un triangle quelconque
+CATEGORIE: trigonométrie
+---
+//Formules d'Euler//
+TITRE: Formule d'Euler (exponentielle complexe)
+FORMULE: $e^{i\theta} = \cos(\theta) + i\sin(\theta)$
+DESCRIPTION: Lien fondamental entre la fonction exponentielle complexe et les fonctions trigonométriques
+CATEGORIE: trigonométrie
+---
+TITRE: Expressions de sinus et cosinus
+FORMULE: $\cos(\theta) = \frac{e^{i\theta} + e^{-i\theta}}{2}, \quad \sin(\theta) = \frac{e^{i\theta} - e^{-i\theta}}{2i}$
+DESCRIPTION: Expressions des fonctions trigonométriques à l'aide de l'exponentielle complexe
+CATEGORIE: trigonométrie
+---
+//Dérivées trigonométriques (pour référence)//
+TITRE: Dérivée du sinus
+FORMULE: $\frac{d}{dx}\sin(x) = \cos(x)$
+DESCRIPTION: Dérivée de la fonction sinus
+CATEGORIE: trigonométrie
+---
+TITRE: Dérivée du cosinus
+FORMULE: $\frac{d}{dx}\cos(x) = -\sin(x)$
+DESCRIPTION: Dérivée de la fonction cosinus
+CATEGORIE: trigonométrie
+---
+TITRE: Dérivée de la tangente
+FORMULE: $\frac{d}{dx}\tan(x) = 1 + \tan^2(x) = \frac{1}{\cos^2(x)}$
+DESCRIPTION: Dérivée de la fonction tangente
+CATEGORIE: trigonométrie
+
+//Quadrilatères - Rectangle//
+TITRE: Périmètre du rectangle
+FORMULE: $P = 2(L + l)$
+DESCRIPTION: Périmètre d'un rectangle de longueur L et de largeur l
+CATEGORIE: géométrie
+---
+TITRE: Aire du rectangle
+FORMULE: $A = L \times l$
+DESCRIPTION: Aire d'un rectangle de longueur L et de largeur l
+CATEGORIE: géométrie
+---
+//Quadrilatères - Carré//
+TITRE: Périmètre du carré
+FORMULE: $P = 4 \times c$
+DESCRIPTION: Périmètre d'un carré de côté c
+CATEGORIE: géométrie
+---
+TITRE: Aire du carré
+FORMULE: $A = c^2$
+DESCRIPTION: Aire d'un carré de côté c
+CATEGORIE: géométrie
+---
+//Quadrilatères - Parallélogramme//
+TITRE: Périmètre du parallélogramme
+FORMULE: $P = 2(a + b)$
+DESCRIPTION: Périmètre d'un parallélogramme avec côtés consécutifs a et b
+CATEGORIE: géométrie
+---
+TITRE: Aire du parallélogramme
+FORMULE: $A = b \times h$
+DESCRIPTION: Aire d'un parallélogramme où b est la base et h la hauteur associée
+CATEGORIE: géométrie
+---
+//Quadrilatères - Losange//
+TITRE: Périmètre du losange
+FORMULE: $P = 4 \times c$
+DESCRIPTION: Périmètre d'un losange de côté c (formule identique au carré)
+CATEGORIE: géométrie
+---
+TITRE: Aire du losange
+FORMULE: $A = \frac{D \times d}{2}$
+DESCRIPTION: Aire d'un losange où D est la grande diagonale et d la petite diagonale
+CATEGORIE: géométrie
+---
+//Quadrilatères - Trapèze//
+TITRE: Périmètre du trapèze
+FORMULE: $P = a + b + c + d$
+DESCRIPTION: Périmètre d'un trapèze avec les quatre côtés a, b, c, d (les bases et les deux côtés non parallèles)
+CATEGORIE: géométrie
+---
+TITRE: Aire du trapèze
+FORMULE: $A = \frac{(B + b) \times h}{2}$
+DESCRIPTION: Aire d'un trapèze où B et b sont les longueurs des deux bases parallèles et h la hauteur
+CATEGORIE: géométrie
+---
+//Triangles//
+TITRE: Périmètre du triangle
+FORMULE: $P = a + b + c$
+DESCRIPTION: Périmètre d'un triangle avec côtés a, b, c
+CATEGORIE: géométrie
+---
+TITRE: Aire du triangle (formule générale)
+FORMULE: $A = \frac{b \times h}{2}$
+DESCRIPTION: Aire d'un triangle où b est la base et h la hauteur associée
+CATEGORIE: géométrie
+---
+TITRE: Aire du triangle (formule de Héron)
+FORMULE: $A = \sqrt{p(p-a)(p-b)(p-c)}$ avec $p = \frac{a+b+c}{2}$
+DESCRIPTION: Aire d'un triangle en fonction des trois côtés (p est le demi-périmètre)
+CATEGORIE: géométrie
+---
+TITRE: Aire du triangle rectangle
+FORMULE: $A = \frac{a \times b}{2}$
+DESCRIPTION: Aire d'un triangle rectangle où a et b sont les longueurs des côtés de l'angle droit
+CATEGORIE: géométrie
+---
+//Cercles et disques//
+TITRE: Circonférence du cercle
+FORMULE: $C = 2\pi r$
+DESCRIPTION: Périmètre du cercle (circonférence) où r est le rayon
+CATEGORIE: géométrie
+---
+TITRE: Aire du disque
+FORMULE: $A = \pi r^2$
+DESCRIPTION: Aire du disque délimité par un cercle de rayon r
+CATEGORIE: géométrie
+---
+//Secteur circulaire//
+TITRE: Longueur d'un arc de cercle
+FORMULE: $L = \frac{\theta}{360} \times 2\pi r$ (degrés) ou $L = \theta r$ (radians)
+DESCRIPTION: Longueur d'un arc de cercle d'angle au centre θ
+CATEGORIE: géométrie
+---
+TITRE: Aire d'un secteur circulaire
+FORMULE: $A_s = \frac{\theta}{360} \times \pi r^2$ (degrés) ou $A_s = \frac{1}{2} \theta r^2$ (radians)
+DESCRIPTION: Aire d'un secteur circulaire d'angle au centre θ
+CATEGORIE: géométrie
+---
+//Ellipse//
+TITRE: Périmètre de l'ellipse (approximation)
+FORMULE: $P \approx 2\pi \sqrt{\frac{a^2 + b^2}{2}}$ (approximation de Ramanujan)
+DESCRIPTION: Approximation du périmètre d'une ellipse de demi-grand axe a et demi-petit axe b
+CATEGORIE: géométrie
+---
+TITRE: Aire de l'ellipse
+FORMULE: $A = \pi \times a \times b$
+DESCRIPTION: Aire d'une ellipse de demi-grand axe a et demi-petit axe b
+CATEGORIE: géométrie
+---
+//Polygones réguliers//
+TITRE: Périmètre du polygone régulier
+FORMULE: $P = n \times c$
+DESCRIPTION: Périmètre d'un polygone régulier à n côtés de longueur c
+CATEGORIE: géométrie
+---
+TITRE: Aire du polygone régulier
+FORMULE: $A = \frac{n \times c \times a}{2}$
+DESCRIPTION: Aire d'un polygone régulier à n côtés de longueur c, où a est l'apothème (distance du centre au milieu d'un côté)
+CATEGORIE: géométrie
+---
+//Solides - Aire latérale et volume (pour référence)//
+TITRE: Aire latérale du cylindre droit
+FORMULE: $A_l = 2\pi r h$
+DESCRIPTION: Aire latérale d'un cylindre droit de rayon r et de hauteur h
+CATEGORIE: géométrie dans l'espace
+---
+TITRE: Aire totale du cylindre droit
+FORMULE: $A_t = 2\pi r(r + h)$
+DESCRIPTION: Aire totale d'un cylindre droit (aire latérale + 2 × aire de base)
+CATEGORIE: géométrie dans l'espace
+---
+TITRE: Aire de la sphère
+FORMULE: $A = 4\pi r^2$
+DESCRIPTION: Aire de la surface d'une sphère de rayon r
+CATEGORIE: géométrie dans l'espace
+---
+TITRE: Aire latérale du cône droit
+FORMULE: $A_l = \pi r s$
+DESCRIPTION: Aire latérale d'un cône droit de rayon r et de génératrice s
+CATEGORIE: géométrie dans l'espace
+
