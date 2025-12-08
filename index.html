@@ -5,38 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>mathX_searcher | Recherche ultra-rapide de formules</title>
     
-    <!-- Styles -->
+    <!-- Styles principaux -->
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="logique.css">
     
-    <!-- Icônes Font Awesome -->
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- KaTeX pour le rendu mathématique -->
+    <!-- KaTeX -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-    <!-- Ajouter après KaTeX -->
-<script defer src="katex-converter.js"></script>
     
     <!-- Préchargement -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    
-    <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
-    
-    <!-- Configuration Firebase -->
-    <script src="firebase-config.js" defer></script>
 </head>
 <body>
-    <!-- Header avec effet flou -->
+    <!-- Header -->
     <header class="header">
         <div class="header-container">
-            <!-- Logo seul dans un carré -->
             <a href="index.html" class="logo-square">
                 <img src="logo.png" alt="mathX_searcher" class="logo-img">
             </a>
             
-            <!-- Barre de recherche PRINCIPALE -->
+            <!-- Barre de recherche -->
             <div class="search-bar">
                 <i class="fas fa-search search-icon"></i>
                 <input type="text" 
@@ -45,19 +35,16 @@
                        placeholder="Rechercher une formule... (ex: Pythagore, dérivée, intégrale)"
                        autocomplete="off"
                        spellcheck="false">
-                
-                <!-- Suggestions en temps réel -->
                 <div class="search-suggestions" id="searchSuggestions"></div>
             </div>
             
-            <!-- Bouton Sidebar (Hamburger) -->
             <button class="sidebar-toggle" id="sidebarToggle" aria-label="Ouvrir le menu">
                 <i class="fas fa-bars"></i>
             </button>
         </div>
     </header>
 
-    <!-- BARRE DE FILTRES -->
+    <!-- Filtres -->
     <div class="filters-bar">
         <div class="filters-container">
             <div class="filter-options">
@@ -84,7 +71,6 @@
 
     <!-- Contenu principal -->
     <main class="main-content">
-        <!-- État initial -->
         <div class="welcome-state" id="welcomeState">
             <div class="welcome-icon">
                 <i class="fas fa-calculator"></i>
@@ -111,39 +97,33 @@
             </div>
         </div>
         
-        <!-- Zone des RÉSULTATS -->
         <div class="results-container" id="resultsContainer"></div>
         
-        <!-- État "Aucun résultat" -->
         <div class="no-results-state" id="noResultsState">
             <i class="fas fa-search"></i>
             <h3>Aucun résultat trouvé</h3>
             <p>Essayez avec d'autres termes ou vérifiez vos filtres</p>
         </div>
         
-        <!-- État "Recherche en cours" -->
         <div class="searching-state" id="searchingState">
             <div class="spinner"></div>
             <p>Recherche en cours...</p>
         </div>
     </main>
 
-    <!-- Barre de navigation en BAS -->
+    <!-- Navigation bas -->
     <nav class="bottom-nav">
         <div class="nav-container">
-            <!-- Onglet Recherche -->
             <a href="index.html" class="nav-tab active">
                 <i class="fas fa-search"></i>
                 <span class="tab-label">Recherche</span>
             </a>
             
-            <!-- Onglet Exercices -->
             <a href="exercise.html" class="nav-tab">
                 <i class="fas fa-pen-to-square"></i>
                 <span class="tab-label">Exercices</span>
             </a>
             
-            <!-- Onglet Profil -->
             <a href="auth.html" class="nav-tab" id="profileTab">
                 <i class="fas fa-user"></i>
                 <span class="tab-label">Profil</span>
@@ -151,7 +131,7 @@
         </div>
     </nav>
 
-    <!-- Sidebar SIMPLIFIÉE -->
+    <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <div class="sidebar-title">
@@ -165,32 +145,27 @@
         
         <div class="sidebar-content">
             <nav class="sidebar-nav">
-                <!-- Accueil -->
                 <a href="index.html" class="sidebar-link">
                     <i class="fas fa-home"></i>
                     <span>Accueil</span>
                 </a>
                 
-                <!-- Contact -->
                 <a href="contact.html" class="sidebar-link">
                     <i class="fas fa-envelope"></i>
                     <span>Contact</span>
                 </a>
                 
-                <!-- À propos -->
                 <a href="apropos.html" class="sidebar-link">
                     <i class="fas fa-info-circle"></i>
                     <span>À propos</span>
                 </a>
                 
-                <!-- Confidentialité -->
                 <a href="confidentialite.html" class="sidebar-link">
                     <i class="fas fa-shield-alt"></i>
                     <span>Confidentialité</span>
                 </a>
             </nav>
             
-            <!-- Note informative -->
             <div class="sidebar-info">
                 <p><strong>Favoris & Historique</strong></p>
                 <p class="info-text">Accessibles depuis l'onglet <strong>Profil</strong> en bas</p>
@@ -198,27 +173,348 @@
         </div>
     </aside>
 
-    <!-- Overlay -->
     <div class="overlay" id="overlay"></div>
 
-    <!-- KaTeX JavaScript -->
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
     
-    <!-- Scripts de l'application -->
+    <script src="firebase-config.js" defer></script>
+    <script src="katex-converter.js" defer></script>
     <script src="script.js"></script>
     <script src="rech.js"></script>
     <script src="filtre.js"></script>
     
-    <!-- Initialisation -->
+    <!-- Système de persistance simplifié -->
+    <script>
+        // Gestionnaire d'état simplifié
+        class SimpleStateManager {
+            constructor() {
+                this.currentPage = 'index';
+                this.init();
+            }
+            
+            init() {
+                console.log('💾 SimpleStateManager initialisé');
+                this.loadState();
+                this.setupListeners();
+                this.setupVisibilityHandler();
+                
+                // Restaurer l'état si on revient avec le bouton retour
+                if (performance.navigation.type === 2) { // TYPE_BACK_FORWARD
+                    setTimeout(() => this.restoreState(), 300);
+                }
+            }
+            
+            setupListeners() {
+                // Recherche
+                const searchInput = document.getElementById('mainSearchInput');
+                if (searchInput) {
+                    searchInput.addEventListener('input', () => this.saveState());
+                }
+                
+                // Filtres
+                document.querySelectorAll('.filter-input').forEach(input => {
+                    input.addEventListener('change', () => this.saveState());
+                });
+                
+                // Scroll (avec debounce)
+                let scrollTimeout;
+                window.addEventListener('scroll', () => {
+                    clearTimeout(scrollTimeout);
+                    scrollTimeout = setTimeout(() => {
+                        this.saveScrollPosition();
+                    }, 300);
+                });
+            }
+            
+            setupVisibilityHandler() {
+                document.addEventListener('visibilitychange', () => {
+                    if (!document.hidden) {
+                        setTimeout(() => this.restoreState(), 100);
+                    }
+                });
+            }
+            
+            saveState() {
+                try {
+                    const state = {
+                        search: document.getElementById('mainSearchInput')?.value || '',
+                        filters: this.getFiltersState(),
+                        scroll: window.scrollY,
+                        timestamp: Date.now()
+                    };
+                    
+                    localStorage.setItem('mathx_index_state', JSON.stringify(state));
+                } catch (e) {
+                    console.warn('⚠️ Erreur sauvegarde état:', e);
+                }
+            }
+            
+            saveScrollPosition() {
+                try {
+                    const state = JSON.parse(localStorage.getItem('mathx_index_state') || '{}');
+                    state.scroll = window.scrollY;
+                    localStorage.setItem('mathx_index_state', JSON.stringify(state));
+                } catch (e) {
+                    // Ignorer les erreurs
+                }
+            }
+            
+            loadState() {
+                try {
+                    const state = JSON.parse(localStorage.getItem('mathx_index_state') || '{}');
+                    return state;
+                } catch (e) {
+                    return {};
+                }
+            }
+            
+            restoreState() {
+                try {
+                    const state = this.loadState();
+                    if (!state.search && !state.scroll) return;
+                    
+                    // Restaurer la recherche
+                    const searchInput = document.getElementById('mainSearchInput');
+                    if (searchInput && state.search) {
+                        searchInput.value = state.search;
+                        
+                        // Déclencher la recherche si nécessaire
+                        if (state.search.trim() && window.RechercheEngine) {
+                            setTimeout(() => {
+                                if (typeof window.RechercheEngine.rechercher === 'function') {
+                                    window.RechercheEngine.rechercher(state.search);
+                                }
+                            }, 500);
+                        }
+                    }
+                    
+                    // Restaurer les filtres
+                    if (state.filters) {
+                        this.restoreFilters(state.filters);
+                    }
+                    
+                    // Restaurer le scroll
+                    if (state.scroll > 0) {
+                        setTimeout(() => {
+                            window.scrollTo({ top: state.scroll, behavior: 'auto' });
+                        }, 200);
+                    }
+                    
+                } catch (e) {
+                    console.warn('⚠️ Erreur restauration état:', e);
+                }
+            }
+            
+            getFiltersState() {
+                const filters = {};
+                document.querySelectorAll('.filter-input').forEach(input => {
+                    const filterName = input.closest('.filter-checkbox').dataset.filter;
+                    filters[filterName] = input.checked;
+                });
+                return filters;
+            }
+            
+            restoreFilters(filters) {
+                document.querySelectorAll('.filter-input').forEach(input => {
+                    const filterName = input.closest('.filter-checkbox').dataset.filter;
+                    if (filters.hasOwnProperty(filterName)) {
+                        input.checked = filters[filterName];
+                        input.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                });
+            }
+            
+            clearState() {
+                localStorage.removeItem('mathx_index_state');
+            }
+        }
+        
+        // Initialisation
+        let stateManager = null;
+        document.addEventListener('DOMContentLoaded', () => {
+            stateManager = new SimpleStateManager();
+            window.StateManager = stateManager;
+        });
+    </script>
+    
+    <!-- Système d'authentification corrigé -->
+    <script>
+        // Fonction pour afficher les messages d'état
+        function showAuthStatus(message, type = 'info') {
+            // Supprimer les anciens messages
+            document.querySelectorAll('.auth-status').forEach(msg => msg.remove());
+            
+            // Créer le message
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `auth-status auth-${type}`;
+            
+            // Styles inline pour garantir l'affichage
+            messageDiv.style.cssText = `
+                position: fixed;
+                bottom: 90px;
+                left: 50%;
+                transform: translateX(-50%) translateY(0);
+                padding: 14px 24px;
+                border-radius: 12px;
+                font-weight: 500;
+                font-size: 0.95rem;
+                z-index: 9999;
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+                animation: authSlideUp 0.4s ease, authFadeOut 0.4s ease 4.6s;
+                max-width: 90%;
+                width: auto;
+                text-align: center;
+                pointer-events: none;
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            `;
+            
+            // Appliquer les couleurs selon le type
+            if (type === 'connected') {
+                messageDiv.style.background = 'linear-gradient(135deg, rgba(16, 185, 129, 0.95), rgba(5, 150, 105, 0.95))';
+                messageDiv.style.color = 'white';
+                messageDiv.style.borderLeft = '4px solid #10b981';
+                messageDiv.innerHTML = `<i class="fas fa-check-circle"></i><span>${message}</span>`;
+            } else if (type === 'disconnected') {
+                messageDiv.style.background = 'linear-gradient(135deg, rgba(245, 158, 11, 0.95), rgba(217, 119, 6, 0.95))';
+                messageDiv.style.color = 'white';
+                messageDiv.style.borderLeft = '4px solid #f59e0b';
+                messageDiv.innerHTML = `<i class="fas fa-user-slash"></i><span>${message}</span>`;
+            } else {
+                messageDiv.style.background = 'linear-gradient(135deg, rgba(59, 130, 246, 0.95), rgba(37, 99, 235, 0.95))';
+                messageDiv.style.color = 'white';
+                messageDiv.style.borderLeft = '4px solid #3b82f6';
+                messageDiv.innerHTML = `<i class="fas fa-info-circle"></i><span>${message}</span>`;
+            }
+            
+            // Ajouter les animations CSS
+            if (!document.querySelector('#auth-animations')) {
+                const style = document.createElement('style');
+                style.id = 'auth-animations';
+                style.textContent = `
+                    @keyframes authSlideUp {
+                        from { opacity: 0; transform: translateX(-50%) translateY(30px); }
+                        to { opacity: 1; transform: translateX(-50%) translateY(0); }
+                    }
+                    @keyframes authFadeOut {
+                        from { opacity: 1; }
+                        to { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+                    }
+                    @media (max-width: 768px) {
+                        .auth-status {
+                            bottom: 100px;
+                            max-width: 95%;
+                            padding: 12px 18px;
+                            font-size: 0.9rem;
+                        }
+                    }
+                    @media (max-width: 480px) {
+                        .auth-status {
+                            bottom: 110px;
+                            padding: 10px 15px;
+                            font-size: 0.85rem;
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            // Ajouter au body
+            document.body.appendChild(messageDiv);
+            
+            // Auto-suppression après 5 secondes
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.remove();
+                }
+            }, 5000);
+            
+            return messageDiv;
+        }
+        
+        // Mettre à jour le lien Profil
+        function updateProfileLink(user) {
+            const profileTab = document.getElementById('profileTab');
+            if (!profileTab) return;
+            
+            if (user) {
+                // Utilisateur connecté
+                profileTab.href = 'profil.html';
+                profileTab.innerHTML = '<i class="fas fa-user"></i><span class="tab-label">Profil</span>';
+            } else {
+                // Utilisateur non connecté
+                profileTab.href = 'auth.html';
+                profileTab.innerHTML = '<i class="fas fa-user"></i><span class="tab-label">Profil</span>';
+            }
+        }
+        
+        // Vérifier l'authentification
+        function checkAuthStatus() {
+            if (typeof firebase !== 'undefined' && firebase.auth) {
+                // Surveiller les changements
+                firebase.auth().onAuthStateChanged((user) => {
+                    updateProfileLink(user);
+                    
+                    if (user) {
+                        showAuthStatus(`Connecté en tant que ${user.email}`, 'connected');
+                    } else {
+                        showAuthStatus('Non connecté', 'disconnected');
+                    }
+                });
+                
+                // Vérifier l'état actuel
+                const currentUser = firebase.auth().currentUser;
+                if (currentUser) {
+                    updateProfileLink(currentUser);
+                    showAuthStatus(`Bonjour ${currentUser.email}`, 'connected');
+                } else {
+                    updateProfileLink(null);
+                    showAuthStatus('Non connecté', 'disconnected');
+                }
+            } else {
+                console.warn('Firebase non disponible');
+                showAuthStatus('Chargement...', 'info');
+                
+                // Réessayer après 2 secondes
+                setTimeout(checkAuthStatus, 2000);
+            }
+        }
+        
+        // Initialiser
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🔐 Vérification authentification...');
+            
+             // Attendre que Firebase soit chargé
+            const checkFirebase = setInterval(() => {
+                if (typeof firebase !== 'undefined') {
+                    clearInterval(checkFirebase);
+                    checkAuthStatus();
+                }
+            }, 100);
+            
+            // Timeout
+            setTimeout(() => clearInterval(checkFirebase), 5000);
+        });
+    </script>
+    
+    <!-- Initialisation KaTeX -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🧮 mathX_searcher - Chargement avec KaTeX');
             
-            // Attendre que KaTeX soit chargé
             const checkKaTeX = setInterval(() => {
                 if (typeof katex !== 'undefined') {
                     clearInterval(checkKaTeX);
-                    console.log('✅ KaTeX chargé pour rendu mathématique');
+                    console.log('✅ KaTeX chargé');
                     
                     // Précharger les données
                     if (window.RechercheEngine && typeof window.RechercheEngine.prechargerDonnees === 'function') {
@@ -228,149 +524,5 @@
             }, 100);
         });
     </script>
-    
-    <!-- Script de vérification d'authentification -->
-    <script>
-        // Fonction pour afficher un message temporaire
-        function showAuthMessage(message, isConnected) {
-            // Supprimer les anciens messages
-            const oldMessages = document.querySelectorAll('.auth-message');
-            oldMessages.forEach(msg => msg.remove());
-            
-            // Créer le message
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `auth-message ${isConnected ? 'connected' : 'disconnected'}`;
-            messageDiv.innerHTML = `
-                <i class="fas ${isConnected ? 'fa-check-circle' : 'fa-user-slash'}"></i>
-                <span>${message}</span>
-            `;
-            
-            document.body.appendChild(messageDiv);
-            
-            // Auto-suppression après 5 secondes
-            setTimeout(() => {
-                if (messageDiv.parentNode) {
-                    messageDiv.remove();
-                }
-            }, 5000);
-        }
-        
-        // Fonction pour mettre à jour le lien Profil
-        function updateProfileLink(user) {
-            const profileTab = document.getElementById('profileTab');
-            if (!profileTab) return;
-            
-            if (user) {
-                // Utilisateur connecté
-                profileTab.href = 'profil.html';
-                profileTab.innerHTML = '<i class="fas fa-user"></i><span class="tab-label">Profil</span>';
-                console.log('✅ Lien Profil mis à jour vers profil.html');
-            } else {
-                // Utilisateur non connecté
-                profileTab.href = 'auth.html';
-                profileTab.innerHTML = '<i class="fas fa-user"></i><span class="tab-label">Profil</span>';
-                console.log('✅ Lien Profil mis à jour vers auth.html');
-            }
-        }
-        
-        // Vérifier l'authentification
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🔐 Vérification de l\'authentification...');
-            
-            // Attendre que Firebase soit chargé
-            const checkFirebase = setInterval(() => {
-                if (typeof firebase !== 'undefined' && firebase.auth) {
-                    clearInterval(checkFirebase);
-                    
-                    // Surveiller les changements d'état
-                    firebase.auth().onAuthStateChanged(function(user) {
-                        console.log('👤 État auth changé:', user ? user.email : 'null');
-                        
-                        // Mettre à jour le lien
-                        updateProfileLink(user);
-                        
-                        // Afficher message
-                        if (user) {
-                            showAuthMessage(`Connecté en tant que ${user.email}`, true);
-                        } else {
-                            showAuthMessage('Non connecté. Cliquez sur "Profil" pour vous connecter', false);
-                        }
-                    });
-                    
-                    // Vérifier l'état actuel
-                    const currentUser = firebase.auth().currentUser;
-                    if (currentUser) {
-                        console.log('✅ Utilisateur déjà connecté:', currentUser.email);
-                        updateProfileLink(currentUser);
-                        showAuthMessage(`Bienvenue ${currentUser.email} !`, true);
-                    } else {
-                        console.log('👤 Aucun utilisateur connecté');
-                        updateProfileLink(null);
-                        showAuthMessage('Non connecté. Cliquez sur "Profil" pour vous connecter', false);
-                    }
-                }
-            }, 100);
-            
-            // Timeout de sécurité
-            setTimeout(() => {
-                clearInterval(checkFirebase);
-            }, 5000);
-        });
-    </script>
-    
-    <!-- Styles pour les messages d'authentification -->
-    <style>
-        .auth-message {
-            position: fixed;
-            bottom: 80px; /* Au-dessus de la bottom-nav */
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-weight: 500;
-            z-index: 999;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            animation: slideUp 0.3s ease, fadeOut 0.3s ease 4.7s;
-            max-width: 90%;
-            text-align: center;
-            pointer-events: none;
-        }
-        
-        .auth-message.connected {
-            background: #10b981;
-            color: white;
-            border-left: 4px solid #059669;
-        }
-        
-        .auth-message.disconnected {
-            background: #f59e0b;
-            color: white;
-            border-left: 4px solid #d97706;
-        }
-        
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateX(-50%) translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(-50%) translateY(0);
-            }
-        }
-        
-        @keyframes fadeOut {
-            from {
-                opacity: 1;
-            }
-            to {
-                opacity: 0;
-            }
-        }
-        
-        .auth-message i {
-            margin-right: 8px;
-        }
-    </style>
 </body>
 </html>

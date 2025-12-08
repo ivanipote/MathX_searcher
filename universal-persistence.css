@@ -1,0 +1,189 @@
+/* === STYLES UNIVERSELLES POUR LA PERSISTANCE === */
+
+/* Indicateur de sauvegarde universel */
+.universal-saving-indicator {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    background: rgba(59, 130, 246, 0.95);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 25px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    z-index: 10000;
+    opacity: 0;
+    transform: translateY(-15px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.universal-saving-indicator.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Animation de restauration */
+.page-state-restored {
+    animation: stateRestoredHighlight 1.2s ease;
+}
+
+@keyframes stateRestoredHighlight {
+    0% {
+        background-color: rgba(16, 185, 129, 0.15);
+    }
+    70% {
+        background-color: rgba(16, 185, 129, 0.05);
+    }
+    100% {
+        background-color: transparent;
+    }
+}
+
+/* Désactiver les transitions pendant la restauration */
+.state-restoring * {
+    transition: none !important;
+    animation: none !important;
+}
+
+/* Scroll restauré */
+.scroll-restoring {
+    scroll-behavior: auto !important;
+}
+
+/* Optimisations de performance */
+[data-state-persisted] {
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+}
+
+/* États préservés */
+.state-preserved-element {
+    transition: all 0.25s ease;
+}
+
+/* Messages temporaires universels */
+.universal-status-message {
+    position: fixed;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 14px 24px;
+    border-radius: 12px;
+    font-weight: 500;
+    z-index: 9999;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    animation: universalMessageSlideUp 0.4s ease, universalMessageFadeOut 0.4s ease 4.6s;
+    max-width: 95%;
+    text-align: center;
+    pointer-events: none;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.universal-status-message.success {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+}
+
+.universal-status-message.info {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+}
+
+.universal-status-message.warning {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+}
+
+.universal-status-message.error {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+}
+
+@keyframes universalMessageSlideUp {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+@keyframes universalMessageFadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+/* Loader universel */
+.universal-state-loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(8px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9998;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.universal-state-loader.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.universal-state-spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid #e2e8f0;
+    border-top: 4px solid #3b82f6;
+    border-radius: 50%;
+    animation: universalSpin 1.2s linear infinite;
+    margin-bottom: 20px;
+}
+
+@keyframes universalSpin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Badge d'état */
+.state-badge {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+/* Transition entre pages */
+.page-state-transition {
+    opacity: 1;
+    transition: opacity 0.25s ease;
+}
+
+.page-state-transition.fade-out {
+    opacity: 0.5;
+}

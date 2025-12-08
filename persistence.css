@@ -1,0 +1,111 @@
+/* === STYLES POUR LA PERSISTANCE D'ÉTAT === */
+
+/* Messages d'authentification */
+.auth-message {
+    position: fixed;
+    bottom: 80px; /* Au-dessus de la bottom-nav */
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 500;
+    z-index: 999;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    animation: slideUp 0.3s ease, fadeOut 0.3s ease 4.7s;
+    max-width: 90%;
+    text-align: center;
+    pointer-events: none;
+}
+
+.auth-message.connected {
+    background: #10b981;
+    color: white;
+    border-left: 4px solid #059669;
+}
+
+.auth-message.disconnected {
+    background: #f59e0b;
+    color: white;
+    border-left: 4px solid #d97706;
+}
+
+.auth-message i {
+    margin-right: 8px;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+/* Indicateur de sauvegarde */
+.state-saving-indicator {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background: rgba(59, 130, 246, 0.9);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    pointer-events: none;
+}
+
+.state-saving-indicator.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Transitions fluides */
+.page-state-transition * {
+    transition: background-color 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* État restauré visuellement */
+.state-restored {
+    animation: highlightRestore 1.5s ease;
+}
+
+@keyframes highlightRestore {
+    0% {
+        background-color: rgba(59, 130, 246, 0.1);
+    }
+    100% {
+        background-color: transparent;
+    }
+}
+
+/* Scroll restauré */
+.scroll-restoring {
+    scroll-behavior: auto !important;
+}
+
+/* Optimisation pour la persistance */
+[data-persist-state] {
+    will-change: transform, opacity;
+}
+
+/* Cache pour préserver les performances */
+.state-preserved {
+    backface-visibility: hidden;
+    transform: translateZ(0);
+}

@@ -22,8 +22,6 @@
     
     <!-- Scripts Auth -->
     <script src="auth.js" defer></script>
-    
-    <!-- Script Auth UI -->
     <script src="auth-ui.js" defer></script>
 </head>
 <body>
@@ -45,11 +43,12 @@
                 <span class="app-version">v1.0</span>
             </div>
         </div>
+            
     </header>
 
     <!-- Conteneur principal -->
     <main class="auth-container">
-        <!-- Carte d'authentification -->
+        <!-- Carte d'authentification SEULE -->
         <div class="auth-card">
             <!-- En-tête avec onglets -->
             <div class="auth-tabs">
@@ -291,39 +290,16 @@
                 </div>
             </div>
 
-            <!-- Footer de la carte -->
+            <!-- Footer de la carte (SIMPLIFIÉ) -->
             <div class="auth-footer">
-                <p>En utilisant ce service, vous acceptez nos conditions.</p>
-                <p class="auth-security">
-                    <i class="fas fa-shield-alt"></i>
-                    Vos données sont sécurisées avec Firebase
-                </p>
+                <p>Vos données sont sécurisées avec Firebase</p>
             </div>
         </div>
 
-        <!-- Infos supplémentaires -->
-        <div class="auth-info">
-            <div class="info-card">
-                <i class="fas fa-star"></i>
-                <h3>Accédez à plus de contenu</h3>
-                <p>Exercices exclusifs, historique sauvegardé, favoris synchronisés</p>
-            </div>
-            
-            <div class="info-card">
-                <i class="fas fa-sync-alt"></i>
-                <h3>Synchronisation multi-appareils</h3>
-                <p>Accédez à vos données depuis n'importe quel appareil</p>
-            </div>
-            
-            <div class="info-card">
-                <i class="fas fa-chart-line"></i>
-                <h3>Suivez vos progrès</h3>
-                <p>Statistiques personnelles et recommandations adaptées</p>
-            </div>
-        </div>
+        <!-- INFO SECTIONS SUPPRIMÉES -->
     </main>
 
-    <!-- Modal de succès (pour inscription) -->
+    <!-- Modal de succès (gardé pour inscription) -->
     <div id="successModal" class="modal">
         <div class="modal-content">
             <div class="modal-icon success">

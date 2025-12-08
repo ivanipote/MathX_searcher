@@ -602,3 +602,314 @@ body {
         height: 16px;
     }
 }
+/* === TRANSITIONS DE PAGE === */
+
+/* Classe appliquée pendant les transitions */
+.page-transition main {
+    animation: fadeOut 0.2s ease;
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0.5; }
+}
+
+/* Animation d'entrée pour le nouveau contenu */
+.page-transition-ending main {
+    animation: fadeIn 0.3s ease 0.1s both;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0.5; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Animation de rotation pour le spinner */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Cache pour les éléments en transition */
+[data-page-cache] {
+    display: none;
+}
+
+[data-page-cache].active {
+    display: block;
+}
+/* === MESSAGES D'ÉTAT D'AUTHENTIFICATION === */
+
+/* Message temporaire d'authentification */
+.auth-status-message {
+    position: fixed;
+    bottom: 90px; /* Au-dessus de la bottom-nav */
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 14px 24px;
+    border-radius: 12px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    z-index: 9999;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    animation: authMessageSlideUp 0.4s ease, authMessageFadeOut 0.4s ease 4.6s;
+    max-width: 90%;
+    width: auto;
+    text-align: center;
+    pointer-events: none;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* État connecté */
+.auth-status-message.connected {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.95), rgba(5, 150, 105, 0.95));
+    color: white;
+    border-left: 4px solid #10b981;
+}
+
+/* État déconnecté */
+.auth-status-message.disconnected {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.95), rgba(217, 119, 6, 0.95));
+    color: white;
+    border-left: 4px solid #f59e0b;
+}
+
+/* État vérification */
+.auth-status-message.checking {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.95), rgba(37, 99, 235, 0.95));
+    color: white;
+    border-left: 4px solid #3b82f6;
+}
+
+/* État erreur */
+.auth-status-message.error {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.95), rgba(220, 38, 38, 0.95));
+    color: white;
+    border-left: 4px solid #ef4444;
+}
+
+/* Icône dans le message */
+.auth-status-message i {
+    font-size: 1.1rem;
+    min-width: 20px;
+    text-align: center;
+}
+
+/* Texte du message */
+.auth-status-message span {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Lien dans le message (pour "Se connecter") */
+.auth-status-message a {
+    color: white;
+    font-weight: 600;
+    text-decoration: underline;
+    margin-left: 5px;
+    pointer-events: auto;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+.auth-status-message a:hover {
+    opacity: 0.9;
+}
+
+/* Animation d'entrée */
+@keyframes authMessageSlideUp {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+/* Animation de sortie */
+@keyframes authMessageFadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-10px);
+    }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .auth-status-message {
+        bottom: 100px; /* Un peu plus haut sur mobile */
+        max-width: 95%;
+        padding: 12px 18px;
+        font-size: 0.9rem;
+        white-space: normal;
+        word-wrap: break-word;
+    }
+    
+    .auth-status-message i {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .auth-status-message {
+        bottom: 110px;
+        padding: 10px 15px;
+        font-size: 0.85rem;
+        border-radius: 10px;
+    }
+    
+    .auth-status-message i {
+        font-size: 0.9rem;
+    }
+}
+
+/* Adaptation pour le mode sombre (si vous l'avez) */
+@media (prefers-color-scheme: dark) {
+    .auth-status-message {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+    
+    .auth-status-message.connected {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.9), rgba(5, 150, 105, 0.9));
+    }
+    
+    .auth-status-message.disconnected {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.9), rgba(217, 119, 6, 0.9));
+    }
+}
+
+/* Prévenir les conflits avec la bottom-nav */
+.bottom-nav ~ .auth-status-message {
+    z-index: 10000; /* Au-dessus de la navigation */
+}
+
+/* Assurer que le message ne cache pas les éléments interactifs */
+.auth-status-message:not(.has-link) {
+    pointer-events: none;
+}
+
+.auth-status-message.has-link {
+    pointer-events: auto;
+}
+
+/* Animation de pulse pour attirer l'attention */
+@keyframes authMessagePulse {
+    0% {
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+    50% {
+        box-shadow: 0 6px 25px rgba(16, 185, 129, 0.3);
+    }
+    100% {
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+}
+
+.auth-status-message.connected.pulse {
+    animation: authMessageSlideUp 0.4s ease, 
+               authMessagePulse 2s ease-in-out infinite,
+               authMessageFadeOut 0.4s ease 4.6s;
+}
+
+/* Variante avec icône animée */
+.auth-status-message .fa-spin {
+    animation: spin 1.5s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Message avec bouton d'action */
+.auth-status-message.with-action {
+    padding-right: 50px;
+    position: relative;
+}
+
+.auth-status-message .action-button {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    pointer-events: auto;
+    transition: background 0.2s ease;
+}
+
+.auth-status-message .action-button:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Pour les longs messages avec retour à la ligne */
+.auth-status-message.multiline {
+    white-space: normal;
+    line-height: 1.4;
+    padding: 15px 20px;
+}
+
+/* Indicateur de durée restante */
+.auth-status-message::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.5);
+    width: 100%;
+    border-radius: 0 0 12px 12px;
+    transform-origin: left;
+    animation: authMessageTimer 5s linear;
+}
+
+@keyframes authMessageTimer {
+    from {
+        transform: scaleX(1);
+    }
+    to {
+        transform: scaleX(0);
+    }
+}
+
+/* Désactiver les animations si l'utilisateur les préfère réduites */
+@media (prefers-reduced-motion: reduce) {
+    .auth-status-message,
+    .auth-status-message::after,
+    .auth-status-message i,
+    .action-button {
+        animation: none !important;
+        transition: none !important;
+    }
+    
+    .auth-status-message {
+        animation: authMessageFadeIn 0.3s ease !important;
+    }
+    
+    @keyframes authMessageFadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+}
