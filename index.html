@@ -19,6 +19,13 @@
     
     <!-- Préchargement -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    
+    <!-- Configuration Firebase -->
+    <script src="firebase-config.js" defer></script>
 </head>
 <body>
     <!-- Header avec effet flou -->
@@ -137,7 +144,7 @@
             </a>
             
             <!-- Onglet Profil -->
-            <a href="auth.html" class="nav-tab">
+            <a href="auth.html" class="nav-tab" id="profileTab">
                 <i class="fas fa-user"></i>
                 <span class="tab-label">Profil</span>
             </a>
@@ -221,5 +228,149 @@
             }, 100);
         });
     </script>
+    
+    <!-- Script de vérification d'authentification -->
+    <script>
+        // Fonction pour afficher un message temporaire
+        function showAuthMessage(message, isConnected) {
+            // Supprimer les anciens messages
+            const oldMessages = document.querySelectorAll('.auth-message');
+            oldMessages.forEach(msg => msg.remove());
+            
+            // Créer le message
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `auth-message ${isConnected ? 'connected' : 'disconnected'}`;
+            messageDiv.innerHTML = `
+                <i class="fas ${isConnected ? 'fa-check-circle' : 'fa-user-slash'}"></i>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(messageDiv);
+            
+            // Auto-suppression après 5 secondes
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.remove();
+                }
+            }, 5000);
+        }
+        
+        // Fonction pour mettre à jour le lien Profil
+        function updateProfileLink(user) {
+            const profileTab = document.getElementById('profileTab');
+            if (!profileTab) return;
+            
+            if (user) {
+                // Utilisateur connecté
+                profileTab.href = 'profil.html';
+                profileTab.innerHTML = '<i class="fas fa-user"></i><span class="tab-label">Profil</span>';
+                console.log('✅ Lien Profil mis à jour vers profil.html');
+            } else {
+                // Utilisateur non connecté
+                profileTab.href = 'auth.html';
+                profileTab.innerHTML = '<i class="fas fa-user"></i><span class="tab-label">Profil</span>';
+                console.log('✅ Lien Profil mis à jour vers auth.html');
+            }
+        }
+        
+        // Vérifier l'authentification
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔐 Vérification de l\'authentification...');
+            
+            // Attendre que Firebase soit chargé
+            const checkFirebase = setInterval(() => {
+                if (typeof firebase !== 'undefined' && firebase.auth) {
+                    clearInterval(checkFirebase);
+                    
+                    // Surveiller les changements d'état
+                    firebase.auth().onAuthStateChanged(function(user) {
+                        console.log('👤 État auth changé:', user ? user.email : 'null');
+                        
+                        // Mettre à jour le lien
+                        updateProfileLink(user);
+                        
+                        // Afficher message
+                        if (user) {
+                            showAuthMessage(`Connecté en tant que ${user.email}`, true);
+                        } else {
+                            showAuthMessage('Non connecté. Cliquez sur "Profil" pour vous connecter', false);
+                        }
+                    });
+                    
+                    // Vérifier l'état actuel
+                    const currentUser = firebase.auth().currentUser;
+                    if (currentUser) {
+                        console.log('✅ Utilisateur déjà connecté:', currentUser.email);
+                        updateProfileLink(currentUser);
+                        showAuthMessage(`Bienvenue ${currentUser.email} !`, true);
+                    } else {
+                        console.log('👤 Aucun utilisateur connecté');
+                        updateProfileLink(null);
+                        showAuthMessage('Non connecté. Cliquez sur "Profil" pour vous connecter', false);
+                    }
+                }
+            }, 100);
+            
+            // Timeout de sécurité
+            setTimeout(() => {
+                clearInterval(checkFirebase);
+            }, 5000);
+        });
+    </script>
+    
+    <!-- Styles pour les messages d'authentification -->
+    <style>
+        .auth-message {
+            position: fixed;
+            bottom: 80px; /* Au-dessus de la bottom-nav */
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            z-index: 999;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            animation: slideUp 0.3s ease, fadeOut 0.3s ease 4.7s;
+            max-width: 90%;
+            text-align: center;
+            pointer-events: none;
+        }
+        
+        .auth-message.connected {
+            background: #10b981;
+            color: white;
+            border-left: 4px solid #059669;
+        }
+        
+        .auth-message.disconnected {
+            background: #f59e0b;
+            color: white;
+            border-left: 4px solid #d97706;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+        
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
+        }
+        
+        .auth-message i {
+            margin-right: 8px;
+        }
+    </style>
 </body>
 </html>
