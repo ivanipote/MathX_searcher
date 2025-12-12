@@ -86,10 +86,10 @@ body {
 }
 
 .logo-img {
-    width: 70%;
-    height: 70%;
+    width: 100%;
+    height: 100%;
     object-fit: contain;
-    filter: brightness(0) invert(1);
+    
 }
 
 /* Barre de recherche compacte */
@@ -616,17 +616,18 @@ body {
 }
 
 /* ================= NAVIGATION BAS ================= */
+/* BARRE DE NAVIGATION EN BAS */
 .bottom-nav {
     background: var(--nav-bg);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
     border-top: 1px solid var(--nav-border);
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
     z-index: 100;
-    padding: 10px 0;
+    padding: 1px 0;
     box-shadow: 0 -3px 15px rgba(0, 0, 0, 0.06);
 }
 
@@ -638,49 +639,42 @@ body {
     align-items: center;
 }
 
+/* Onglets de navigation */
 .nav-tab {
     display: flex;
     flex-direction: column;
     align-items: center;
     text-decoration: none;
     color: #64748b;
-    padding: 10px 20px;
-    border-radius: 10px;
-    transition: all 0.2s ease;
+    padding: 14px 30px;
+    border-radius: 14px;
+    transition: all 0.3s ease;
     flex: 1;
-    max-width: 180px;
+    max-width: 220px;
 }
 
 .nav-tab i {
-    font-size: 1.2rem;
-    margin-bottom: 4px;
+    font-size: 1.6rem;
+    margin-bottom: 6px;
 }
 
 .tab-label {
-    font-size: 0.85rem;
+    font-size: 0.95rem;
     font-weight: 600;
     letter-spacing: 0.3px;
 }
 
 .nav-tab.active {
-    color: var(--primary-blue);
-    background-color: rgba(6, 182, 212, 0.12);
-    transform: translateY(-1px);
+    color: #1d4ed8;
+    background-color: rgba(59, 130, 246, 0.12);
+    transform: translateY(-2px);
 }
 
 .nav-tab:hover:not(.active) {
-    background-color: rgba(6, 182, 212, 0.07);
-    color: var(--primary-blue);
+    background-color: rgba(59, 130, 246, 0.07);
+    color: #3b82f6;
 }
 
-[data-theme="dark"] .nav-tab {
-    color: #cbd5e1;
-}
-
-[data-theme="dark"] .nav-tab.active {
-    background-color: rgba(6, 182, 212, 0.2);
-    color: #22d3ee;
-}
 
 /* ================= ANIMATIONS ================= */
 @keyframes fadeIn {

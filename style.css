@@ -184,17 +184,17 @@ body {
 
 /* BARRE DE NAVIGATION EN BAS */
 .bottom-nav {
-    background-color: rgba(255, 255, 255, 0.95);
+    background: var(--nav-bg);
     backdrop-filter: blur(3px);
     -webkit-backdrop-filter: blur(3px);
-    border-top: 1px solid rgba(59, 130, 246, 0.15);
+    border-top: 1px solid var(--nav-border);
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
     z-index: 100;
-    padding: 12px 0;
-    box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.08);
+    padding: 1px 0;
+    box-shadow: 0 -3px 15px rgba(0, 0, 0, 0.06);
 }
 
 .nav-container {

@@ -680,7 +680,7 @@ function openImagePreview(imageUrl, fileName) {
                      alt="${escapeHTML(fileName)}" 
                      class="modal-image"
                      onload="this.style.opacity='1'; this.previousElementSibling.style.display='none';"
-                     onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"600\" height=\"400\"><rect width=\"600\" height=\"400\" fill=\"%23f1f5f9\"/><text x=\"50%\" y=\"50%\" font-family=\"Arial\" font-size=\"16\" fill=\"%2364748b\" text-anchor=\"middle\" dy=\".3em\">Image non disponible</text></svg>';">
+                     onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"600\" height=\"400\"><rect width=\"600\" height=\"400\" fill=\"%23f1f5f9\"/><text x=\"50%\" y=\"50%\" font-family=\"Arial\" font-size=\"16\" fill=\"%2364748b\" text-anchor=\"middle\" dy=\".3em\"></text></svg>
             </div>
             <div class="image-footer">
                 <button class="btn-download" onclick="downloadImageFromModal('${escapeHTML(imageUrl)}', '${escapeHTML(fileName)}')">
