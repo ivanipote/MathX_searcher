@@ -1,13 +1,17 @@
-// exercices.js - VERSION AVEC API GITHUB
-// mathX_searcher - Utilise l'API GitHub pour scanner les fichiers
+// exercices.js - VERSION COMPLÈTE CORRIGÉE
+// mathX_searcher - GitHub Edition
 
-// ================= CONFIGURATION GITHUB =================
+// ================= CONFIGURATION =================
+const CONFIG = {
+    DEBOUNCE_DELAY: 300,
+    MIN_CHARS: 2
+};
+
 const GITHUB_CONFIG = {
     USER: 'ivanipote',
     REPO: 'MathX_searcher',
     BRANCH: 'main',
-    DOSSIER_EXERCICES: 'exercices',
-    TOKEN: '' // Optionnel: token pour plus de requêtes
+    DOSSIER_EXERCICES: 'exercices'
 };
 
 const API_BASE = `https://api.github.com/repos/${GITHUB_CONFIG.USER}/${GITHUB_CONFIG.REPO}/contents`;
@@ -17,197 +21,6 @@ const RAW_BASE = `https://raw.githubusercontent.com/${GITHUB_CONFIG.USER}/${GITH
 let fileIndex = [];
 let searchTimeout = null;
 let activeFilters = { pdf: true, txt: true, image: true };
-
-// ================= API GITHUB =================
-async function scanGitHubFolder(folderPath = '') {
-    console.log(`🔍 Scan GitHub: ${folderPath || 'racine'}`);
-    
-    try {
-        const apiUrl = `${API_BASE}/${GITHUB_CONFIG.DOSSIER_EXERCICES}${folderPath ? '/' + folderPath : ''}`;
-        console.log('📡 URL API:', apiUrl);
-        
-        const headers = {};
-        if (GITHUB_CONFIG.TOKEN) {
-            headers['Authorization'] = `token ${GITHUB_CONFIG.TOKEN}`;
-        }
-        
-        const response = await fetch(apiUrl, { headers });
-        
-        if (!response.ok) {
-            if (response.status === 403) {
-                console.warn('⚠️ Rate limit GitHub, fallback JSON');
-                return await loadFallbackJSON();
-            }
-            throw new Error(`GitHub API: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        console.log(`📊 Réponse API: ${data.length} items`);
-        
-        const fichiers = [];
-        
-        for (const item of data) {
-            if (item.type === 'file') {
-                const fichier = await processGitHubFile(item, folderPath);
-                if (fichier) fichiers.push(fichier);
-            } else if (item.type === 'dir') {
-                // Scanner les sous-dossiers récursivement
-                const sousFichiers = await scanGitHubFolder(
-                    folderPath ? `${folderPath}/${item.name}` : item.name
-                );
-                fichiers.push(...sousFichiers);
-            }
-        }
-        
-        return fichiers;
-        
-    } catch (error) {
-        console.error('❌ Erreur scan GitHub:', error);
-        return await loadFallbackJSON();
-    }
-}
-
-async function processGitHubFile(item, folderPath) {
-    const extension = item.name.split('.').pop().toLowerCase();
-    const type = getFileType(extension);
-    
-    if (!['pdf', 'txt', 'image'].includes(type)) {
-        return null; // Ignorer les fichiers non supportés
-    }
-    
-    const cheminRelatif = folderPath ? `${folderPath}/${item.name}` : item.name;
-    const rawUrl = `${RAW_BASE}${GITHUB_CONFIG.DOSSIER_EXERCICES}/${cheminRelatif}`;
-    
-    // Pour les fichiers TXT, lire le contenu
-    let extrait = '';
-    if (type === 'txt' && item.size < 100000) { // Max 100KB
-        try {
-            const response = await fetch(rawUrl);
-            if (response.ok) {
-                const texte = await response.text();
-                extrait = texte.substring(0, 300).replace(/\n/g, ' ');
-            }
-        } catch (e) {
-            // Ignorer si erreur lecture
-        }
-    }
-    
-    return {
-        id: `gh-${item.sha.substring(0, 8)}`,
-        nom: item.name,
-        chemin: `${GITHUB_CONFIG.DOSSIER_EXERCICES}/${cheminRelatif}`,
-        url: rawUrl,
-        type: type,
-        titre: formatFileName(item.name),
-        description: getFileDescription(type),
-        icon: getFileIcon(type),
-        color: getFileColor(type),
-        humanSize: formatFileSize(item.size || 0),
-        taille: item.size || 0,
-        extrait: extrait,
-        motsCles: extractKeywords(item.name),
-        date: new Date().toISOString(),
-        source: 'github',
-        sha: item.sha
-    };
-}
-
-async function loadFallbackJSON() {
-    try {
-        const response = await fetch('fichiers.json');
-        if (response.ok) {
-            const data = await response.json();
-            console.log(`📄 Fallback: ${data.fichiers?.length || 0} fichiers`);
-            
-            return (data.fichiers || []).map(fichier => {
-                const type = getFileType(fichier.extension);
-                const rawUrl = `${RAW_BASE}${fichier.chemin}`;
-                
-                return {
-                    id: `json-${Date.now()}-${Math.random().toString(36).substr(2)}`,
-                    nom: fichier.nom,
-                    chemin: fichier.chemin,
-                    url: rawUrl,
-                    type: type,
-                    titre: formatFileName(fichier.nom),
-                    description: getFileDescription(type),
-                    icon: getFileIcon(type),
-                    color: getFileColor(type),
-                    humanSize: formatFileSize(fichier.taille || 0),
-                    taille: fichier.taille || 0,
-                    motsCles: extractKeywords(fichier.nom),
-                    date: fichier.date || new Date().toISOString(),
-                    source: 'json'
-                };
-            });
-        }
-    } catch (e) {
-        console.warn('⚠️ Fallback JSON non disponible');
-    }
-    
-    return createSampleFiles();
-}
-
-function createSampleFiles() {
-    return [
-        {
-            id: 'sample-1',
-            nom: 'exemple_theoreme.pdf',
-            chemin: 'exercices/exemple_theoreme.pdf',
-            url: `${RAW_BASE}exercices/exemple_theoreme.pdf`,
-            type: 'pdf',
-            titre: 'Théorème de Pythagore',
-            description: 'Document PDF sur le théorème',
-            icon: '📄',
-            color: 'file-pdf',
-            humanSize: '1.8 MB',
-            motsCles: ['théorème', 'pythagore', 'géométrie', 'triangle']
-        },
-        {
-            id: 'sample-2',
-            nom: 'exercices_derive.txt',
-            chemin: 'exercices/exercices_derive.txt',
-            url: `${RAW_BASE}exercices/exercices_derive.txt`,
-            type: 'txt',
-            titre: 'Exercices sur les Dérivées',
-            description: 'Série d\'exercices de calcul différentiel',
-            icon: '📃',
-            color: 'file-text',
-            humanSize: '5.2 KB',
-            motsCles: ['dérivée', 'exercice', 'calcul', 'math']
-        }
-    ];
-}
-
-// ================= INITIALISATION =================
-document.addEventListener('DOMContentLoaded', async function() {
-    console.log('🚀 mathX_searcher - GitHub Edition');
-    
-    try {
-        // 1. Vérifier authentification
-        if (!await checkAuthentication()) return;
-        
-        // 2. Initialiser filtres
-        initFilters();
-        
-        // 3. Scanner GitHub
-        showMessage('Connexion à GitHub...', 'info');
-        fileIndex = await scanGitHubFolder();
-        
-        // 4. Initialiser interface
-        initInterface();
-        
-        // 5. Afficher état initial
-        showHomeContent();
-        
-        console.log(`✅ ${fileIndex.length} fichiers chargés depuis GitHub`);
-        showMessage(`${fileIndex.length} fichiers disponibles`, 'success');
-        
-    } catch (error) {
-        console.error('❌ Erreur initialisation:', error);
-        showError('Erreur de chargement');
-    }
-});
 
 // ================= FONCTIONS UTILITAIRES =================
 function getFileType(extension) {
@@ -269,18 +82,342 @@ function escapeHTML(text) {
     return div.innerHTML;
 }
 
-// ================= AUTHENTIFICATION SIMPLIFIÉE =================
-async function checkAuthentication() {
-    // Pour GitHub Pages, vérifier simplement si l'utilisateur a accès
-    const userEmail = localStorage.getItem('mathx_user_email');
-    if (userEmail) {
-        console.log('✅ Utilisateur:', userEmail);
-        return true;
+// ================= API GITHUB =================
+async function scanGitHubFolder(folderPath = '') {
+    console.log(`🔍 Scan GitHub: ${folderPath || 'racine'}`);
+    
+    try {
+        const apiUrl = `${API_BASE}/${GITHUB_CONFIG.DOSSIER_EXERCICES}${folderPath ? '/' + folderPath : ''}`;
+        console.log('📡 URL API:', apiUrl);
+        
+        const response = await fetch(apiUrl);
+        
+        if (!response.ok) {
+            if (response.status === 403) {
+                console.warn('⚠️ Rate limit GitHub');
+                return await loadFallbackJSON();
+            }
+            throw new Error(`GitHub API: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log(`📊 Réponse API: ${data.length} items`);
+        
+        const fichiers = [];
+        
+        for (const item of data) {
+            if (item.type === 'file') {
+                const fichier = await processGitHubFile(item, folderPath);
+                if (fichier) fichiers.push(fichier);
+            } else if (item.type === 'dir') {
+                // Scanner les sous-dossiers
+                const sousFichiers = await scanGitHubFolder(
+                    folderPath ? `${folderPath}/${item.name}` : item.name
+                );
+                fichiers.push(...sousFichiers);
+            }
+        }
+        
+        return fichiers;
+        
+    } catch (error) {
+        console.error('❌ Erreur scan GitHub:', error);
+        return await loadFallbackJSON();
+    }
+}
+
+async function processGitHubFile(item, folderPath) {
+    const extension = item.name.split('.').pop().toLowerCase();
+    const type = getFileType(extension);
+    
+    if (!['pdf', 'txt', 'image'].includes(type)) {
+        return null;
     }
     
-    // Fallback: autoriser l'accès avec avertissement
-    console.log('⚠️ Accès en mode visite');
-    return true;
+    const cheminRelatif = folderPath ? `${folderPath}/${item.name}` : item.name;
+    const rawUrl = `${RAW_BASE}${GITHUB_CONFIG.DOSSIER_EXERCICES}/${cheminRelatif}`;
+    
+    let extrait = '';
+    if (type === 'txt' && item.size < 100000) {
+        try {
+            const response = await fetch(rawUrl);
+            if (response.ok) {
+                const texte = await response.text();
+                extrait = texte.substring(0, 300).replace(/\n/g, ' ');
+            }
+        } catch (e) {}
+    }
+    
+    return {
+        id: `gh-${item.sha?.substring(0, 8) || Date.now()}`,
+        nom: item.name,
+        chemin: `${GITHUB_CONFIG.DOSSIER_EXERCICES}/${cheminRelatif}`,
+        url: rawUrl,
+        type: type,
+        titre: formatFileName(item.name),
+        description: getFileDescription(type),
+        icon: getFileIcon(type),
+        color: getFileColor(type),
+        humanSize: formatFileSize(item.size || 0),
+        taille: item.size || 0,
+        extrait: extrait,
+        motsCles: extractKeywords(item.name),
+        date: new Date().toISOString(),
+        source: 'github'
+    };
+}
+
+async function loadFallbackJSON() {
+    try {
+        const response = await fetch('fichiers.json');
+        if (response.ok) {
+            const data = await response.json();
+            console.log(`📄 Fallback: ${data.fichiers?.length || 0} fichiers`);
+            
+            return (data.fichiers || []).map(fichier => {
+                const type = getFileType(fichier.extension);
+                const rawUrl = `${RAW_BASE}${fichier.chemin}`;
+                
+                return {
+                    id: `json-${Date.now()}-${Math.random().toString(36).substr(2)}`,
+                    nom: fichier.nom,
+                    chemin: fichier.chemin,
+                    url: rawUrl,
+                    type: type,
+                    titre: formatFileName(fichier.nom),
+                    description: getFileDescription(type),
+                    icon: getFileIcon(type),
+                    color: getFileColor(type),
+                    humanSize: formatFileSize(fichier.taille || 0),
+                    taille: fichier.taille || 0,
+                    motsCles: extractKeywords(fichier.nom),
+                    date: fichier.date || new Date().toISOString(),
+                    source: 'json'
+                };
+            });
+        }
+    } catch (e) {
+        console.warn('⚠️ Fallback JSON non disponible');
+    }
+    
+    return createSampleFiles();
+}
+
+function createSampleFiles() {
+    return [
+        {
+            id: 'sample-1',
+            nom: 'exemple_math.pdf',
+            chemin: 'exercices/exemple_math.pdf',
+            url: `${RAW_BASE}exercices/exemple_math.pdf`,
+            type: 'pdf',
+            titre: 'Exemple Mathématiques',
+            description: 'Document PDF d\'exemple',
+            icon: '📄',
+            color: 'file-pdf',
+            humanSize: '2.1 MB',
+            motsCles: ['exemple', 'math', 'pdf']
+        },
+        {
+            id: 'sample-2',
+            nom: 'exercice_algebre.txt',
+            chemin: 'exercices/exercice_algebre.txt',
+            url: `${RAW_BASE}exercices/exercice_algebre.txt`,
+            type: 'txt',
+            titre: 'Exercice Algèbre',
+            description: 'Exercice de mathématiques',
+            icon: '📃',
+            color: 'file-text',
+            humanSize: '4.5 KB',
+            motsCles: ['exercice', 'algèbre', 'math']
+        }
+    ];
+}
+
+// ================= GESTION DES FILTRES =================
+function initFilters() {
+    const savedFilters = localStorage.getItem('mathx_exercices_filtres');
+    if (savedFilters) {
+        try {
+            activeFilters = JSON.parse(savedFilters);
+        } catch (e) {
+            activeFilters = { pdf: true, txt: true, image: true };
+        }
+    }
+    
+    document.querySelectorAll('.filter-input').forEach(input => {
+        const type = input.dataset.type;
+        const checkbox = input.closest('.filter-checkbox');
+        
+        input.checked = activeFilters[type] !== false;
+        
+        if (input.checked) {
+            checkbox.classList.add('active');
+        }
+        
+        input.addEventListener('change', function() {
+            activeFilters[type] = this.checked;
+            
+            if (this.checked) {
+                checkbox.classList.add('active');
+            } else {
+                checkbox.classList.remove('active');
+            }
+            
+            localStorage.setItem('mathx_exercices_filtres', JSON.stringify(activeFilters));
+            
+            const searchInput = document.getElementById('exercicesSearchInput');
+            if (searchInput && searchInput.value.trim()) {
+                performSearch(searchInput.value.trim());
+            }
+        });
+    });
+}
+
+// ================= RECHERCHE INTELLIGENTE =================
+function performSearch(query) {
+    clearTimeout(searchTimeout);
+    
+    const resultsContainer = document.getElementById('resultsContainer');
+    if (resultsContainer) {
+        resultsContainer.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Recherche...</div>';
+    }
+    
+    showResultsContent();
+    
+    if (!query.trim()) {
+        showHomeContent();
+        return;
+    }
+    
+    searchTimeout = setTimeout(() => {
+        const searchTerms = query.toLowerCase().split(' ');
+        
+        // Vérifier filtres actifs
+        const hasActiveFilter = activeFilters.pdf || activeFilters.txt || activeFilters.image;
+        if (!hasActiveFilter) {
+            displayNoActiveFilters(query);
+            return;
+        }
+        
+        // Filtrer par types actifs
+        let filteredByType = fileIndex.filter(file => activeFilters[file.type]);
+        
+        if (filteredByType.length === 0) {
+            displayNoResultsForFilters(query);
+            return;
+        }
+        
+        // Recherche
+        const results = filteredByType.filter(file => {
+            const searchableText = (
+                file.nom.toLowerCase() + ' ' +
+                file.titre.toLowerCase() + ' ' +
+                file.motsCles.join(' ').toLowerCase()
+            );
+            
+            return searchTerms.some(term => 
+                searchableText.includes(term) && term.length > 1
+            );
+        });
+        
+        if (results.length === 0) {
+            displayNoResultsForSearch(query);
+            return;
+        }
+        
+        displaySearchResults(results, query);
+    }, CONFIG.DEBOUNCE_DELAY);
+}
+
+function displayNoActiveFilters(query) {
+    const noResultsState = document.getElementById('noResultsState');
+    if (noResultsState) {
+        noResultsState.style.display = 'block';
+        noResultsState.innerHTML = `
+            <i class="fas fa-filter fa-2x"></i>
+            <h3>Aucun filtre activé</h3>
+            <p>Recherche : <strong>"${escapeHTML(query)}"</strong></p>
+            <p>Activez au moins un filtre.</p>
+        `;
+    }
+    document.getElementById('welcomeState').style.display = 'none';
+    document.getElementById('resultsContainer').style.display = 'none';
+}
+
+function displayNoResultsForFilters(query) {
+    const noResultsState = document.getElementById('noResultsState');
+    const activeFilterNames = getActiveFilterNames();
+    
+    if (noResultsState) {
+        noResultsState.style.display = 'block';
+        noResultsState.innerHTML = `
+            <i class="fas fa-search fa-2x"></i>
+            <h3>Aucun fichier</h3>
+            <p>Recherche : <strong>"${escapeHTML(query)}"</strong></p>
+            <p>Filtre(s) : <strong>${activeFilterNames.join(', ')}</strong></p>
+            <p>Aucun fichier de ce type.</p>
+        `;
+    }
+    document.getElementById('welcomeState').style.display = 'none';
+    document.getElementById('resultsContainer').style.display = 'none';
+}
+
+function displayNoResultsForSearch(query) {
+    const noResultsState = document.getElementById('noResultsState');
+    const activeFilterNames = getActiveFilterNames();
+    
+    if (noResultsState) {
+        noResultsState.style.display = 'block';
+        noResultsState.innerHTML = `
+            <i class="fas fa-search fa-2x"></i>
+            <h3>Aucun résultat</h3>
+            <p>Recherche : <strong>"${escapeHTML(query)}"</strong></p>
+            <p>Filtre(s) : <strong>${activeFilterNames.join(', ')}</strong></p>
+            <p>Essayez d'autres termes.</p>
+            <button class="scan-new-files" onclick="rescanGitHub()" style="margin-top: 20px;">
+                <i class="fab fa-github"></i> Re-scan GitHub
+            </button>
+        `;
+    }
+    document.getElementById('welcomeState').style.display = 'none';
+    document.getElementById('resultsContainer').style.display = 'none';
+}
+
+function displaySearchResults(results, query) {
+    const resultsContainer = document.getElementById('resultsContainer');
+    if (!resultsContainer) return;
+    
+    resultsContainer.innerHTML = '';
+    
+    const resultsCount = document.createElement('div');
+    resultsCount.className = 'results-count';
+    resultsCount.innerHTML = `
+        <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); 
+                    color: white; border-radius: 15px; margin-bottom: 30px;">
+            <h3 style="margin-bottom: 10px;">${results.length} résultat(s)</h3>
+            <p style="opacity: 0.9;">Recherche : "${escapeHTML(query)}"</p>
+            <small>Filtres : ${getActiveFilterNames().join(', ')}</small>
+        </div>
+    `;
+    resultsContainer.appendChild(resultsCount);
+    
+    results.forEach(file => {
+        const card = createFileCard(file);
+        resultsContainer.appendChild(card);
+    });
+    
+    resultsContainer.style.display = 'grid';
+    document.getElementById('noResultsState').style.display = 'none';
+    document.getElementById('welcomeState').style.display = 'none';
+}
+
+function getActiveFilterNames() {
+    const filters = [];
+    if (activeFilters.pdf) filters.push('PDF');
+    if (activeFilters.txt) filters.push('Exercices');
+    if (activeFilters.image) filters.push('Images');
+    return filters.length === 0 ? ['Aucun'] : filters;
 }
 
 // ================= CRÉATION DES CARTES =================
@@ -299,7 +436,7 @@ function createFileCard(file) {
                      alt="${escapeHTML(file.titre)}" 
                      class="image-preview"
                      loading="lazy"
-                     onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"300\" height=\"200\"><rect width=\"300\" height=\"200\" fill=\"%23f1f5f9\"/><text x=\"50%\" y=\"50%\" font-family=\"Arial\" font-size=\"14\" fill=\"%2364748b\" text-anchor=\"middle\" dy=\".3em\">Image non disponible</text></svg>'">
+                     onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"300\" height=\"200\"><rect width=\"300\" height=\"200\" fill=\"%23f1f5f9\"/><text x=\"50%\" y=\"50%\" font-family=\"Arial\" font-size=\"14\" fill=\"%2364748b\" text-anchor=\"middle\" dy=\".3em\">Image GitHub</text></svg>'">
             </div>
         `;
     } else {
@@ -365,7 +502,7 @@ function createFileCard(file) {
                 <span>${file.humanSize}</span>
             </div>
             <div class="info-item">
-                <i class="fas fa-database"></i>
+                <i class="fab fa-github"></i>
                 <span title="${escapeHTML(file.nom)}">${escapeHTML(shortName)}</span>
             </div>
         </div>
@@ -376,47 +513,6 @@ function createFileCard(file) {
     `;
     
     return div;
-}
-
-// ================= MESSAGES =================
-function showMessage(text, type = 'info') {
-    const messageDiv = document.createElement('div');
-    messageDiv.className = 'github-message';
-    messageDiv.innerHTML = `
-        <i class="fas fa-${type === 'success' ? 'check-circle' : 
-                           type === 'error' ? 'exclamation-triangle' : 
-                           type === 'warning' ? 'exclamation-circle' : 'info-circle'}"></i>
-        <span>${text}</span>
-    `;
-    
-    messageDiv.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 12px 20px;
-        background: ${type === 'error' ? '#ef4444' : 
-                     type === 'success' ? '#10b981' : 
-                     type === 'warning' ? '#f59e0b' : '#3b82f6'};
-        color: white;
-        border-radius: 8px;
-        z-index: 10000;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        animation: messageSlideIn 0.3s ease;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    `;
-    
-    document.body.appendChild(messageDiv);
-    
-    setTimeout(() => {
-        messageDiv.style.animation = 'messageSlideOut 0.3s ease';
-        setTimeout(() => messageDiv.remove(), 300);
-    }, 3000);
-}
-
-function showError(message) {
-    showMessage(message, 'error');
 }
 
 // ================= VISIONNEUSE D'IMAGES =================
@@ -434,11 +530,11 @@ function openImagePreview(imageUrl, fileName) {
             <div class="image-container">
                 <img src="${escapeHTML(imageUrl)}" 
                      alt="${escapeHTML(fileName)}" 
-                     onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"400\" height=\"300\"><rect width=\"400\" height=\"300\" fill=\"%23f1f5f9\"/><text x=\"50%\" y=\"50%\" font-family=\"Arial\" font-size=\"16\" fill=\"%2364748b\" text-anchor=\"middle\" dy=\".3em\">Image GitHub non disponible</text></svg>'">
+                     onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"400\" height=\"300\"><rect width=\"400\" height=\"300\" fill=\"%23f1f5f9\"/><text x=\"50%\" y=\"50%\" font-family=\"Arial\" font-size=\"16\" fill=\"%2364748b\" text-anchor=\"middle\" dy=\".3em\">Image GitHub</text></svg>'">
             </div>
             <div class="image-footer">
                 <a href="${escapeHTML(imageUrl)}" class="btn-download" download="${escapeHTML(fileName)}">
-                    <i class="fas fa-download"></i> Télécharger depuis GitHub
+                    <i class="fas fa-download"></i> Télécharger
                 </a>
             </div>
         </div>
@@ -456,7 +552,67 @@ function closeImagePreview() {
     }
 }
 
-// ================= INTERFACE =================
+// ================= GESTION INTERFACE =================
+function showHomeContent() {
+    const welcomeState = document.getElementById('welcomeState');
+    const noResultsState = document.getElementById('noResultsState');
+    const resultsContainer = document.getElementById('resultsContainer');
+    
+    if (welcomeState) welcomeState.style.display = 'block';
+    if (noResultsState) noResultsState.style.display = 'none';
+    if (resultsContainer) resultsContainer.style.display = 'none';
+}
+
+function showResultsContent() {
+    const welcomeState = document.getElementById('welcomeState');
+    if (welcomeState) welcomeState.style.display = 'none';
+}
+
+async function rescanGitHub() {
+    const scanBtn = document.getElementById('scanNewFilesBtn');
+    if (scanBtn) {
+        scanBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Scan...';
+        scanBtn.disabled = true;
+    }
+    
+    fileIndex = await scanGitHubFolder();
+    
+    const searchInput = document.getElementById('exercicesSearchInput');
+    if (searchInput && searchInput.value.trim()) {
+        performSearch(searchInput.value.trim());
+    }
+    
+    if (scanBtn) {
+        scanBtn.innerHTML = '<i class="fab fa-github"></i> Re-scan GitHub';
+        scanBtn.disabled = false;
+    }
+}
+
+// ================= INITIALISATION =================
+document.addEventListener('DOMContentLoaded', async function() {
+    console.log('🚀 mathX_searcher - GitHub Edition');
+    
+    try {
+        // 1. Initialiser filtres
+        initFilters();
+        
+        // 2. Scanner GitHub
+        console.log('🔍 Connexion à GitHub...');
+        fileIndex = await scanGitHubFolder();
+        
+        // 3. Initialiser interface
+        initInterface();
+        
+        // 4. Afficher état initial
+        showHomeContent();
+        
+        console.log(`✅ ${fileIndex.length} fichiers chargés depuis GitHub`);
+        
+    } catch (error) {
+        console.error('❌ Erreur initialisation:', error);
+    }
+});
+
 function initInterface() {
     const searchInput = document.getElementById('exercicesSearchInput');
     
@@ -482,31 +638,8 @@ function initInterface() {
     
     const scanBtn = document.getElementById('scanNewFilesBtn');
     if (scanBtn) {
-        scanBtn.addEventListener('click', async function() {
-            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Scan GitHub...';
-            this.disabled = true;
-            
-            fileIndex = await scanGitHubFolder();
-            
-            const searchInput = document.getElementById('exercicesSearchInput');
-            if (searchInput && searchInput.value.trim()) {
-                performSearch(searchInput.value.trim());
-            }
-            
-            this.innerHTML = '<i class="fab fa-github"></i> Re-scan GitHub';
-            this.disabled = false;
-        });
+        scanBtn.addEventListener('click', rescanGitHub);
     }
-}
-
-function showHomeContent() {
-    document.getElementById('welcomeState').style.display = 'block';
-    document.getElementById('noResultsState').style.display = 'none';
-    document.getElementById('resultsContainer').style.display = 'none';
-}
-
-function showResultsContent() {
-    document.getElementById('welcomeState').style.display = 'none';
 }
 
 // ================= EXPORT =================
@@ -515,8 +648,13 @@ window.ExercicesManager = {
     search: performSearch,
     getFiles: () => fileIndex,
     getFilters: () => activeFilters,
-    rescan: () => location.reload()
+    rescan: rescanGitHub
 };
+
+window.openImagePreview = openImagePreview;
+window.closeImagePreview = closeImagePreview;
+window.rescanGitHub = rescanGitHub;
+window.performSearch = performSearch;
 
 // Console styling
 console.log('%c✨ mathX_searcher - GitHub Edition ✨', 'color: #6e40c9; font-size: 18px; font-weight: bold;');
