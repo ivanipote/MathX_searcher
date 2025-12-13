@@ -121,6 +121,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 </head>
 <body>
+    
     <!-- Header -->
     <header class="header">
         <div class="header-container">
@@ -230,45 +231,58 @@
     </nav>
 
     <!-- Sidebar -->
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <div class="sidebar-title">
-                <i class="fas fa-bars"></i>
-                <span>Menu</span>
-            </div>
-            <button class="sidebar-close" id="sidebarClose" aria-label="Fermer le menu">
-                <i class="fas fa-times"></i>
-            </button>
+    <!-- Dans le sidebar de index.html -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <div class="sidebar-title">
+            <i class="fas fa-bars"></i>
+            <span>Menu</span>
         </div>
-        
-        <div class="sidebar-content">
-            <nav class="sidebar-nav">
-                <a href="auth.html" class="nav-tab" id="profileTab">
+        <button class="sidebar-close" id="sidebarClose" aria-label="Fermer le menu">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    
+    <div class="sidebar-content">
+        <nav class="sidebar-nav">
+            <a href="profil.html" class="sidebar-link" id="profileTab">
                 <i class="fas fa-user"></i>
-                <span class="tab-label">Profil</span>
+                <span>Profil</span>
             </a>
+            
+            
+            <!-- NOUVEAU : Bouton Télécharger APK -->
+            <a href="#" class="sidebar-link" id="downloadApkBtn">
+                <i class="fas fa-download"></i>
+                <span>Télécharger l'APK</span>
+                <span class="apk-badge">Android</span>
+            </a>
+            
+            <a href="contact.html" class="sidebar-link">
+                <i class="fas fa-envelope"></i>
+                <span>Contact</span>
+            </a>
+            
+            <a href="apropos.html" class="sidebar-link">
+                <i class="fas fa-info-circle"></i>
+                <span>À propos</span>
+            </a>
+            
+            <a href="confidentialite.html" class="sidebar-link">
+                <i class="fas fa-shield-alt"></i>
+                <span>Confidentialité</span>
+            </a>
+        </nav>
         
-                
-                <a href="contact.html" class="sidebar-link">
-                    <i class="fas fa-envelope"></i>
-                    <span>Contact</span>
-                </a>
-                
-                <a href="apropos.html" class="sidebar-link">
-                    <i class="fas fa-info-circle"></i>
-                    <span>À propos</span>
-                </a>
-                
-                <a href="confidentialite.html" class="sidebar-link">
-                    <i class="fas fa-shield-alt"></i>
-                    <span>Confidentialité</span>
-                </a>
-            </nav>
-            
-            
+        <!-- Section info version APK -->
+        <div class="sidebar-footer">
+            <div class="apk-info">
+                <i class="fas fa-android"></i>
+                <span>Version Android disponible</span>
             </div>
         </div>
-    </aside>
+    </div>
+</aside>
 <div class="overlay" id="overlay"></div>
 
 <script>
@@ -317,5 +331,196 @@ document.addEventListener('DOMContentLoaded', () => {
     
     <!-- Script principal -->
     <script src="script.js"></script>
+    <script>
+// pwa-install.js - Gestion de l'installation PWA
+console.log('📱 PWA Install Manager');
+
+let deferredPrompt;
+const installButton = document.createElement('button');
+
+// Créer le bouton d'installation stylé
+function createInstallButton() {
+    installButton.id = 'pwaInstallBtn';
+    installButton.className = 'pwa-install-btn';
+    installButton.innerHTML = `
+        <i class="fas fa-download"></i>
+        <span>Installer l'app</span>
+        <small>Expérience native</small>
+    `;
+    installButton.style.cssText = `
+        position: fixed;
+        bottom: 90px;
+        right: 20px;
+        background: linear-gradient(135deg, #06b6d4, #0891b2);
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        z-index: 999;
+        box-shadow: 0 4px 20px rgba(6, 182, 212, 0.4);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        animation: slideInUp 0.3s ease;
+        transition: all 0.3s ease;
+    `;
+    
+    installButton.addEventListener('click', async () => {
+        installButton.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+            installButton.style.transform = 'scale(1)';
+        }, 150);
+        
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            
+            if (outcome === 'accepted') {
+                console.log('✅ PWA installée');
+                showPWAInstallMessage('🎉 Application installée avec succès !');
+                installButton.remove();
+            }
+            deferredPrompt = null;
+        }
+    });
+    
+    // Animation
+    if (!document.querySelector('#pwa-anim')) {
+        const style = document.createElement('style');
+        style.id = 'pwa-anim';
+        style.textContent = `
+            @keyframes slideInUp {
+                from { transform: translateY(100%); opacity: 0; }
+                to { transform: translateY(0); opacity: 1; }
+            }
+            @keyframes pulse {
+                0%, 100% { box-shadow: 0 4px 20px rgba(6, 182, 212, 0.4); }
+                50% { box-shadow: 0 4px 30px rgba(6, 182, 212, 0.6); }
+            }
+            .pwa-install-btn:hover {
+                animation: pulse 1.5s infinite;
+                transform: translateY(-2px);
+            }
+        `;
+        document.head.appendChild(style);
+    }
+}
+
+// Détecter si PWA peut être installée
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    
+    // Vérifier si déjà installée
+    if (!window.matchMedia('(display-mode: standalone)').matches) {
+        createInstallButton();
+        document.body.appendChild(installButton);
+        
+        // Auto-cacher après 30 secondes
+        setTimeout(() => {
+            if (installButton.parentNode) {
+                installButton.style.animation = 'slideOutDown 0.3s ease';
+                setTimeout(() => installButton.remove(), 300);
+            }
+        }, 30000);
+    }
+});
+
+// Détecter si l'app est déjà installée
+window.addEventListener('appinstalled', () => {
+    console.log('📱 PWA déjà installée');
+    deferredPrompt = null;
+    
+    // Ajouter badge "Installé"
+    const badge = document.createElement('div');
+    badge.id = 'pwaBadge';
+    badge.innerHTML = '<i class="fas fa-check-circle"></i> Application';
+    badge.style.cssText = `
+        position: fixed;
+        top: 70px;
+        right: 20px;
+        background: rgba(16, 185, 129, 0.9);
+        color: white;
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        z-index: 999;
+        animation: slideInRight 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        backdrop-filter: blur(10px);
+    `;
+    document.body.appendChild(badge);
+    
+    // Retirer après 5 secondes
+    setTimeout(() => {
+        badge.style.animation = 'slideOutRight 0.3s ease';
+        setTimeout(() => badge.remove(), 300);
+    }, 5000);
+});
+
+// Vérifier au chargement
+if (window.matchMedia('(display-mode: standalone)').matches) {
+    console.log('📱 Mode standalone détecté - Application installée');
+    
+    // Optimisations pour le mode app
+    document.documentElement.setAttribute('data-pwa', 'true');
+    
+    // Cacher la barre d'adresse sur iOS
+    const meta = document.createElement('meta');
+    meta.name = 'apple-mobile-web-app-capable';
+    meta.content = 'yes';
+    document.head.appendChild(meta);
+}
+
+function showPWAInstallMessage(message) {
+    const msg = document.createElement('div');
+    msg.className = 'pwa-message';
+    msg.textContent = message;
+    msg.style.cssText = `
+        position: fixed;
+        bottom: 160px;
+        right: 20px;
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 15px;
+        z-index: 999;
+        box-shadow: 0 6px 25px rgba(16, 185, 129, 0.4);
+        animation: slideInUp 0.3s ease;
+        font-weight: 500;
+        max-width: 250px;
+    `;
+    
+    document.body.appendChild(msg);
+    
+    setTimeout(() => {
+        msg.style.animation = 'slideOutDown 0.3s ease';
+        setTimeout(() => msg.remove(), 300);
+    }, 3000);
+}
+
+console.log('✅ PWA Manager prêt');
+</script>
+<script>
+// Enregistrement du Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then((registration) => {
+        console.log('✅ Service Worker enregistré:', registration.scope);
+      })
+      .catch((error) => {
+        console.log('❌ Erreur Service Worker:', error);
+      });
+  });
+}
+</script>
 </body>
 </html>

@@ -610,7 +610,7 @@ body {
     position: fixed;
     top: 0;
     right: -350px;
-    width: 250px;
+    width: 300px;
     height: 100vh;
     z-index: 2000;
     transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1152,4 +1152,131 @@ a:focus {
     .search-input:focus {
         border: 3px solid #06b6d4;
     }
+}
+/* ===================== PWA STYLES ===================== */
+/* Mode standalone */
+@media (display-mode: standalone) {
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .header {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  /* Cacher la barre d'adresse */
+  .bottom-nav {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Mode plein écran */
+@media (display-mode: fullscreen) {
+  .header {
+    padding-top: 0;
+  }
+}
+
+/* Animations PWA */
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOutRight {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(100%); opacity: 0; }
+}
+
+@keyframes slideOutDown {
+  from { transform: translateY(0); opacity: 1; }
+  to { transform: translateY(100%); opacity: 0; }
+}
+
+/* Badge application installée */
+[data-pwa="true"] .pwa-install-btn {
+  display: none !important;
+}
+
+/* iOS specific */
+@supports (-webkit-touch-callout: none) {
+  .bottom-nav {
+    padding-bottom: calc(20px + env(safe-area-inset-bottom));
+  }
+}
+/* ===================== SIDEBAR APK STYLES ===================== */
+.apk-badge {
+    background: linear-gradient(135deg, #3DDC84, #34A853);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-left: auto;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+#downloadApkBtn {
+    position: relative;
+    background: linear-gradient(135deg, rgba(61, 220, 132, 0.1), rgba(52, 168, 83, 0.1));
+    border-left: 3px solid #3DDC84;
+}
+
+#downloadApkBtn:hover {
+    background: linear-gradient(135deg, rgba(61, 220, 132, 0.2), rgba(52, 168, 83, 0.2));
+}
+
+#downloadApkBtn i {
+    color: #3DDC84;
+}
+
+.sidebar-footer {
+    padding: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 20px;
+}
+
+.apk-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #94a3b8;
+    font-size: 0.85rem;
+    padding: 10px 15px;
+    background: rgba(61, 220, 132, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(61, 220, 132, 0.1);
+}
+
+.apk-info i {
+    color: #3DDC84;
+    font-size: 1.1rem;
+}
+
+/* Animation pour le bouton APK */
+@keyframes androidPulse {
+    0%, 100% { 
+        box-shadow: 0 0 0 0 rgba(61, 220, 132, 0.4);
+        transform: scale(1);
+    }
+    50% { 
+        box-shadow: 0 0 0 8px rgba(61, 220, 132, 0);
+        transform: scale(1.05);
+    }
+}
+
+#downloadApkBtn .apk-badge {
+    animation: androidPulse 2s infinite;
+}
+
+/* Dark mode */
+[data-theme="dark"] #downloadApkBtn {
+    background: linear-gradient(135deg, rgba(61, 220, 132, 0.15), rgba(52, 168, 83, 0.15));
+}
+
+[data-theme="dark"] .apk-info {
+    background: rgba(61, 220, 132, 0.08);
+    border-color: rgba(61, 220, 132, 0.15);
 }
