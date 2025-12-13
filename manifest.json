@@ -1,33 +1,19 @@
 {
   "name": "MATH-X-HELPER",
   "short_name": "MathX",
-  "description": "Assistant mathématique intelligent avec IA. Recherche ultra-rapide de formules, résolutions étape par étape pour étudiants et professionnels.",
+  "description": "Mathematical assistant with AI - Formula search, step by step solutions, learning tools",
   "start_url": "/MathX_searcher/",
-  "scope": "/MathX_searcher/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#06b6d4",
-  "orientation": "portrait",
-  "lang": "fr",
-  "categories": ["education", "productivity"],
   "icons": [
     {
       "src": "logo.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "logo.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "sizes": "192x192 512x512",
+      "type": "image/png"
     }
+  ]
+
   ],
   "screenshots": [
     {
